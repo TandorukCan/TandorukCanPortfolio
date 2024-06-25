@@ -1,5 +1,5 @@
 <?php
-	$username = "tanjoe"; //register and change username
+	$username = "tanjoe"; //will be changed to "demo" when it's made public
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
