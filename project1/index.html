@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>Gazetteer</title>
+    <meta name="author" content="Tandoruk Can" />
+    <meta name="description" content="Gazetteer App" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="icon" href="favicon.png" />
+    <!-- <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    /> -->
+    <link rel="stylesheet" href="libs/css/leaflet.css" />
+    <link rel="stylesheet" href="libs/css/toastify.min.css" />
+    <link rel="stylesheet" href="libs/css/MarkerCluster.Default.min.css" />
+    <link rel="stylesheet" href="libs/css/MarkerCluster.min.css" />
+    <link rel="stylesheet" href="libs/css/leaflet.extra-markers.min.css" />
+    <link rel="stylesheet" href="libs/css/all.min.css" />
+    <link rel="stylesheet" href="libs/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="libs/css/easy-button.min.css" />
+    <link rel="stylesheet" href="libs/css/style.css" />
+  </head>
+  <body>
+    <!-- <div id="mainLoader"> -->
+    <!-- <img src="Fidget-spinner.gif" alt="" /> -->
+    <!-- <div class="progress">
+        <div class="indeterminate"></div>
+      </div>
+    </div> -->
+    <div id="mainLoader"></div>
+    <span id="selectContainer">
+      <p id="selectTitle" class="text-center shadow-sm bg-white">
+        Choose A Country
+      </p>
+      <select id="countrySelect" class="text-center form-select shadow-sm">
+        <!-- populate from fetch CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
+        <option value=""></option>
+      </select>
+    </span>
+
+    <div id="map"></div>
+
+    <!-- example modal layout -->
+
+    <div id="exampleModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-success bg-gradient text-white">
+            <h5 class="modal-title">General Overview</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <img id="flag" src="" alt="flag" />
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-flag fa-xl text-success"></i>
+                </td>
+
+                <td>Country Name</td>
+
+                <td id="countryName" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-language fa-xl text-success"></i>
+                </td>
+
+                <td>Language:</td>
+
+                <td id="language" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-regular fa-flag fa-xl text-success"></i>
+                </td>
+
+                <td>Country Code</td>
+
+                <td id="countryCode" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i
+                    class="fa-solid fa-building-columns fa-xl text-success"
+                  ></i>
+                </td>
+
+                <td>Capital</td>
+
+                <td id="capital" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-coins fa-xl text-success"></i>
+                </td>
+
+                <td>Currency</td>
+
+                <td id="currencyCode" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-right-left fa-xl text-success"></i>
+                </td>
+
+                <td>Exchange Rate</td>
+
+                <td id="exchangeRate" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-users fa-xl text-success"></i>
+                </td>
+                <td>Population</td>
+
+                <td id="population" class="text-end"></td>
+              </tr>
+
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-chart-area fa-xl text-success"></i>
+                </td>
+
+                <td>Area</td>
+
+                <td id="areaInSqKm" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i id="contClass"></i>
+                </td>
+
+                <td>Continent</td>
+
+                <td id="continentName" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
+                </td>
+
+                <td>Northernmost</td>
+
+                <td id="north" class="text-end">value</td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
+                </td>
+
+                <td>Easternmost</td>
+
+                <td id="east" class="text-end">value</td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
+                </td>
+
+                <td>Southernmost</td>
+
+                <td id="south" class="text-end">value</td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
+                </td>
+
+                <td>Westernmost</td>
+
+                <td id="west" class="text-end">value</td>
+              </tr>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-success btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+          <div id="overviewLoader"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="weatherModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <!-- <div id="loader">
+            <div class="progress">
+              <div class="indeterminate"></div>
+            </div>
+          </div> -->
+          <div class="modal-header bg-warning bg-gradient text-white">
+            <h5 class="modal-title">Weather Overview</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <div id="loader">
+                <!-- <img src="Fidget-spinner.gif" alt="" /> -->
+                <div class="progress">
+                  <div class="indeterminate"></div>
+                </div>
+              </div>
+              <tr>
+                <td class="text-center align-middle">
+                  <i class="fa-solid fa-landmark-flag fa-xl text-warning"></i>
+                </td>
+                <td class="align-middle">State</td>
+                <td id="stateSelectContainer" class="text-end">
+                  <select id="stateSelect" class="form-select shadow-sm">
+                    <!-- populate from an AJAX CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
+                    <option value="">Choose A State</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-center align-middle">
+                  <i class="fa-solid fa-city fa-xl text-warning"></i>
+                </td>
+                <td class="align-middle">City</td>
+                <td id="citySelectContainer" class="text-end">
+                  <select id="citySelect" class="form-select shadow-sm">
+                    <!-- populate from an AJAX CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
+                    <option id="choose_a_city" value="">Choose A City</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-regular fa-calendar fa-xl text-warning"></i>
+                </td>
+
+                <td>Date</td>
+
+                <td id="date" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-clock fa-xl text-warning"></i>
+                </td>
+
+                <td>Time Zone</td>
+
+                <td id="time_zone" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-scale-balanced fa-xl text-warning"></i>
+                </td>
+
+                <td>Units</td>
+
+                <td id="units" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-umbrella fa-xl text-warning"></i>
+                </td>
+
+                <td>Weather Condition</td>
+
+                <td id="description" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i
+                    class="fa-solid fa-temperature-half fa-xl text-warning"
+                  ></i>
+                </td>
+
+                <td>Temperature</td>
+
+                <td id="temperature" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i
+                    class="fa-solid fa-temperature-half fa-xl text-warning"
+                  ></i>
+                </td>
+
+                <td>Feels Like</td>
+
+                <td id="feels_like" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-water fa-xl text-warning"></i>
+                </td>
+
+                <td>Humidity</td>
+
+                <td id="humidity" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-compass fa-xl text-warning"></i>
+                </td>
+
+                <td>Wind Direction</td>
+
+                <td id="wind_direction" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-wind fa-xl text-warning"></i>
+                </td>
+
+                <td>Wind Speed</td>
+
+                <td id="wind_speed" class="text-end"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-solid fa-clipboard-list fa-xl text-warning"></i>
+                </td>
+                <td>Summary</td>
+
+                <td id="summary" class="text-end"></td>
+              </tr>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-warning btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+          <div id="preloader"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="wikiModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-secondary bg-gradient text-white">
+            <h5 class="modal-title">Wikipedia Overview</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <h4 id="wikiTitle" class="text-center"></h4>
+              <img id="wikiImage" src="" alt="image of the country" />
+              <tr>
+                <td class="text-center">
+                  <i
+                    class="fa-solid fa-clipboard-list fa-xl text-secondary"
+                  ></i>
+                </td>
+                <td>Summary</td>
+
+                <td id="wikiSummary"></td>
+              </tr>
+              <tr>
+                <td class="text-center">
+                  <i class="fa-brands fa-wikipedia-w fa-xl text-secondary"></i>
+                </td>
+                <td>Wikipedia Link</td>
+                <td>
+                  <a target="_blank" id="wikiLink" href=""
+                    >This will take you to the wikipedia page of the selected
+                    country</a
+                  >
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+          <div id="wikiLoader"></div>
+        </div>
+      </div>
+    </div>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script> -->
+    <script type="application/javascript" src="libs/js/leaflet.js"></script>
+    <!-- <script type="application/javascript" src="libs/js/jquery.min.js"></script> -->
+    <script
+      type="application/javascript"
+      src="libs/js/toastify.min.js"
+    ></script>
+    <script
+      type="application/javascript"
+      src="libs/js/leaflet.markercluster.js"
+    ></script>
+    <script
+      type="application/javascript"
+      src="libs/js/bootstrap.min.js"
+    ></script>
+    <script
+      type="application/javascript"
+      src="libs/js/easy-button.min.js"
+    ></script>
+    <script type="module" src="libs/js/script.js"></script>
+  </body>
+</html>
