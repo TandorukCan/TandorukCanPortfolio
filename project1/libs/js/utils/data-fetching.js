@@ -3,6 +3,7 @@ import {
   showElement,
   updateElements,
   setContinentClass,
+  initialToUpperCase,
 } from "../utils/utility";
 
 const fetchGetOptions = {
@@ -249,6 +250,104 @@ export const retrieveWiki = async (country) => {
   }
 };
 
+export const retrieveNews = async (country) => {
+  showElement("newsLoader");
+
+  const url = `libs/php/retrieveNews.php?country=${encodeURIComponent(
+    country
+  )}`;
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const articles = await response.json();
+    hideElement("newsLoader");
+    const newsList = document.getElementById("newsList");
+
+    if (newsList.children.length === 0) {
+      // Create a table header
+      const headerRow = document.createElement("tr");
+      headerRow.innerHTML = `
+            <th>Title</th>
+            <th>Author</th>
+            <th>Date</th>
+        `;
+      newsList.appendChild(headerRow);
+    }
+
+    // Populate the table with news articles
+    articles.forEach((article) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+          <td class="text-left"><a href="${article.url}" target="_blank">${
+        article.title
+      }</a></td>
+          <td>${article.author || "Unknown"}</td>
+          <td>${new Date(article.publishedAt).toLocaleDateString()}</td>
+      `;
+      newsList.appendChild(tr);
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export const retrieveCovidStats = async (country) => {
+  showElement("covidLoader");
+  const covidList = document.getElementById("covidList");
+  covidList.innerHTML = "";
+
+  const url = `libs/php/retrieveCovidStats.php?country=${encodeURIComponent(
+    country
+  )}`;
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const stats = await response.json();
+    hideElement("covidLoader");
+    for (let i = 0; i < Object.keys(stats).length; i++) {
+      if (
+        Object.keys(stats)[i] !== "country" &&
+        Object.keys(stats)[i] !== "countryInfo"
+      ) {
+        if (Object.keys(stats)[i] === "updated") {
+          var milliseconds = stats[Object.keys(stats)[i]];
+          var date = new Date(milliseconds);
+          stats[Object.keys(stats)[i]] = date.toString();
+        }
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${initialToUpperCase(Object.keys(stats)[i])}</td>
+          <td>${
+            isNaN(stats[Object.keys(stats)[i]])
+              ? stats[Object.keys(stats)[i]]
+              : parseInt(stats[Object.keys(stats)[i]]).toLocaleString()
+          }</td>
+
+      `;
+        covidList.appendChild(tr);
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 export async function retrieveStates(countryId, currentStateName, ciso2) {
   //last parameter is optional, for when the geodata is retrieved for the first time
   showElement("preloader");
@@ -330,11 +429,6 @@ export const retrieveOverview = async (countryCode) => {
       continentName,
     } = json;
 
-    const north = json.north.toFixed(3);
-    const east = json.east.toFixed(3);
-    const south = json.south.toFixed(3);
-    const west = json.west.toFixed(3);
-
     let languages = json.languages;
     setExchangeRate(currencyCode);
 
@@ -350,16 +444,18 @@ export const retrieveOverview = async (countryCode) => {
 
     const elementsToUpdate = [
       { id: "currencyCode", value: currencyCode },
-      { id: "population", value: population },
+      {
+        id: "population",
+        value: parseInt(population).toLocaleString(),
+      },
       { id: "countryName", value: countryName },
       { id: "capital", value: capital },
       { id: "countryCode", value: countryCode },
-      { id: "areaInSqKm", value: areaInSqKm },
+      {
+        id: "areaInSqKm",
+        value: parseFloat(areaInSqKm).toLocaleString() + " km²",
+      },
       { id: "language", value: language },
-      { id: "north", value: north },
-      { id: "east", value: east },
-      { id: "south", value: south },
-      { id: "west", value: west },
       { id: "continentName", value: continentName },
     ];
 

@@ -22,6 +22,8 @@ import {
   retrieveOverview,
   getLocationCoordinates,
   countryCodeToGeonameId,
+  retrieveNews,
+  retrieveCovidStats,
 } from "./utils/data-fetching.js";
 
 import fetchMarkerData from "./utils/markers.js";
@@ -54,6 +56,8 @@ const setupInterface = (countryCode) => {
   retrieveFlag(countryCode);
   drawCountryBorder(countryCode); //drawing users country by calling drawCountryBorder function.
   retrieveOverview(countryCode);
+  retrieveNews(countryCode);
+  retrieveCovidStats(countryCode);
 };
 
 const resetCurrentLocation = () => {
@@ -67,14 +71,16 @@ const createCountryDropdown = async (iso2) => {
   let selectedCountry;
 
   try {
-    const response = await fetch("libs/countryBorders.geo.json");
+    const response = await fetch("libs/php/retrieveCountryBorders.php");
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const countries = await response.json();
+    const data = await response.json();
+    const countries = data.data.features;
+
     // Populate the countryArray and countriesObject
-    countries.features.forEach((country) => {
+    countries.forEach((country) => {
       countryArray.push(country.properties.name);
       countriesObject[country.properties.name] = country.properties.iso_a2;
     });
@@ -174,6 +180,17 @@ const wikiBtn = L.easyButton("fa-brands fa-wikipedia-w fa-xl", (btn, map) => {
   modal.show();
 });
 
+const newsBtn = L.easyButton("fa-solid fa-newspaper fa-xl", (btn, map) => {
+  const modalElement = document.getElementById("newsModal");
+  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
+  modal.show();
+});
+
+const covidBtn = L.easyButton("fa-solid fa-virus-covid fa-xl", (btn, map) => {
+  const modalElement = document.getElementById("covidModal");
+  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
+  modal.show();
+});
 // ---------------------------------------------------------
 // EVENT HANDLERS
 // ---------------------------------------------------------
@@ -207,6 +224,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   infoBtn.addTo(map);
   weatherBtn.addTo(map);
   wikiBtn.addTo(map);
+  newsBtn.addTo(map);
+  covidBtn.addTo(map);
   map.setView(L.latLng(latitude, longitude), 5);
   // getting the country code of the country that relates to the user's geolocation
   const data = await retrieveGeoInfo(latitude, longitude); // setting up the global location variables to find the country, state and the city that the user is in when they login
@@ -309,6 +328,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const wikiModal = document.getElementById("wikiModal");
   wikiModal.addEventListener("click", () => {
+    isInfoModalHidden = !isInfoModalHidden;
+    if (isInfoModalHidden) {
+      modal.hide();
+      console.log("you clicked outside!"); // will be removed during production
+    }
+    isInfoModalHidden = false;
+  });
+
+  const newsScreen = document.getElementsByClassName("modal-content shadow")[3];
+  newsScreen.addEventListener("click", () => {
+    isInfoModalHidden = !isInfoModalHidden;
+    if (isInfoModalHidden) {
+      console.log("you clicked on the modal!"); // will be removed during production
+    }
+  });
+
+  const newsModal = document.getElementById("newsModal");
+  newsModal.addEventListener("click", () => {
+    isInfoModalHidden = !isInfoModalHidden;
+    if (isInfoModalHidden) {
+      modal.hide();
+      console.log("you clicked outside!"); // will be removed during production
+    }
+    isInfoModalHidden = false;
+  });
+
+  const covidScreen = document.getElementsByClassName(
+    "modal-content shadow"
+  )[4];
+  covidScreen.addEventListener("click", () => {
+    isInfoModalHidden = !isInfoModalHidden;
+    if (isInfoModalHidden) {
+      console.log("you clicked on the modal!"); // will be removed during production
+    }
+  });
+
+  const covidModal = document.getElementById("covidModal");
+  covidModal.addEventListener("click", () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
       modal.hide();

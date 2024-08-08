@@ -13,10 +13,6 @@ export const resetOverview = () => {
     "countryCode",
     "areaInSqKm",
     "language",
-    "north",
-    "east",
-    "south",
-    "west",
     "continentName",
     "exchangeRate",
   ]);
@@ -41,6 +37,18 @@ export const resetWikiData = () => {
   resetInnertext(["wikiTitle", "wikiSummary", "wikiLink", "wikiImage"]);
 };
 
+export const resetNewsData = () => {
+  const newsList = document.getElementById("newsList");
+  newsList.innerHTML = "";
+  const headerRow = document.createElement("tr");
+  headerRow.innerHTML = `
+          <th>Title</th>
+          <th>Author</th>
+          <th>Date</th>
+      `;
+  newsList.appendChild(headerRow);
+};
+
 export const resetStateData = () => {
   stateSelect.replaceChildren();
   stateSelect.appendChild(document.createElement("option")).textContent =
@@ -60,4 +68,5 @@ export const resetAllFields = () => {
   resetStateData();
   resetCityData();
   resetWikiData();
+  resetNewsData();
 };

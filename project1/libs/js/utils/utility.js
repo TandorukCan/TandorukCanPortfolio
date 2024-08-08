@@ -36,3 +36,7 @@ export const setContinentClass = (continentName) => {
       "fa-solid fa-xl text-success fa-globe";
   }
 };
+
+export const initialToUpperCase = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};

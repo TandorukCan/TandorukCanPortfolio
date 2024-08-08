@@ -134,42 +134,6 @@
 
                 <td id="continentName" class="text-end"></td>
               </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
-                </td>
-
-                <td>Northernmost</td>
-
-                <td id="north" class="text-end">value</td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
-                </td>
-
-                <td>Easternmost</td>
-
-                <td id="east" class="text-end">value</td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
-                </td>
-
-                <td>Southernmost</td>
-
-                <td id="south" class="text-end">value</td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-location-pin fa-xl text-success"></i>
-                </td>
-
-                <td>Westernmost</td>
-
-                <td id="west" class="text-end">value</td>
-              </tr>
             </table>
           </div>
           <div class="modal-footer">
@@ -391,6 +355,68 @@
         </div>
       </div>
     </div>
+
+    <div id="newsModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-primary bg-gradient text-white">
+            <h5 class="modal-title">Latest News</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <tbody id="newsList"></tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+          <div id="newsLoader"></div>
+        </div>
+      </div>
+    </div>
+    <div id="covidModal" class="modal" data-bs-backdrop="false" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-danger bg-gradient text-white">
+            <h5 class="modal-title">Latest Covid Statistics</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-striped">
+              <tbody id="covidList"></tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+          <div id="covidLoader"></div>
+        </div>
+      </div>
+    </div>
+
     <script type="application/javascript" src="libs/js/leaflet.js"></script>
     <script
       type="application/javascript"

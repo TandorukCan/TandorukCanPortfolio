@@ -1,10 +1,10 @@
-let layerGroups = {};
+let markerClusters = {};
 
 const uniIcon = L.icon({
   iconUrl: "./libs/css/markers/university.png",
-  iconSize: [35, 41], // size of the icon
-  iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
-  popupAnchor: [1, -34], // point from which the popup should open relative to the iconAnchor
+  iconSize: [35, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
 });
 
 const parkIcon = L.icon({
@@ -115,8 +115,8 @@ const fetchMarkerData = async (layerControl, countryCode, map) => {
       fetchZooData(countryCode),
     ]);
 
-    // Example of adding markers to the map
-    addMarkersToMap(
+    // Adding markers to the map with clustering
+    addMarkersToCluster(
       layerControl,
       capitalData,
       "Capital City",
@@ -124,24 +124,24 @@ const fetchMarkerData = async (layerControl, countryCode, map) => {
       map,
       true
     );
-    addMarkersToMap(layerControl, stateData, "States", stateIcon, map);
-    addMarkersToMap(layerControl, uniData, "Universities", uniIcon, map);
-    addMarkersToMap(layerControl, parkData, "Parks", parkIcon, map);
-    addMarkersToMap(layerControl, museumData, "Museums", museumIcon, map);
-    addMarkersToMap(
+    addMarkersToCluster(layerControl, stateData, "States", stateIcon, map);
+    addMarkersToCluster(layerControl, uniData, "Universities", uniIcon, map);
+    addMarkersToCluster(layerControl, parkData, "Parks", parkIcon, map);
+    addMarkersToCluster(layerControl, museumData, "Museums", museumIcon, map);
+    addMarkersToCluster(
       layerControl,
       amusementData,
       "Amusement Parks",
       amusementIcon,
       map
     );
-    addMarkersToMap(layerControl, zooData, "Zoos", zooIcon, map);
+    addMarkersToCluster(layerControl, zooData, "Zoos", zooIcon, map);
   } catch (error) {
     console.error("Error fetching all data:", error);
   }
 };
 
-const addMarkersToMap = (
+const addMarkersToCluster = (
   layerControl,
   data,
   layerName,
@@ -149,9 +149,9 @@ const addMarkersToMap = (
   map,
   isCapital
 ) => {
-  if (layerGroups[layerName]) {
-    layerGroups[layerName].clearLayers();
-    layerControl.removeLayer(layerGroups[layerName]);
+  if (markerClusters[layerName]) {
+    markerClusters[layerName].clearLayers();
+    layerControl.removeLayer(markerClusters[layerName]);
   }
 
   const markersArray = data.map((place) =>
@@ -161,13 +161,15 @@ const addMarkersToMap = (
         : `${place.name}, ${place.adminName1}`
     )
   );
-  const layerGroup = L.layerGroup(markersArray);
-  layerControl.addOverlay(layerGroup, layerName);
+  const markerClusterGroup = L.markerClusterGroup();
+  markerClusterGroup.addLayers(markersArray);
+
+  layerControl.addOverlay(markerClusterGroup, layerName);
   if (isCapital) {
-    layerGroup.addTo(map);
+    markerClusterGroup.addTo(map);
   }
 
-  layerGroups[layerName] = layerGroup;
+  markerClusters[layerName] = markerClusterGroup;
 };
 
 export default fetchMarkerData;
