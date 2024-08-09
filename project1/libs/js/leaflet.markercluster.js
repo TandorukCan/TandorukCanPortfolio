@@ -1563,4 +1563,3 @@
     (e.MarkerCluster = i),
     Object.defineProperty(e, "__esModule", { value: !0 });
 });
-//# sourceMappingURL=leaflet.markercluster.js.map
