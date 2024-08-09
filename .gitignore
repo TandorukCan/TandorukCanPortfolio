@@ -1,2 +1,6 @@
 .env
 vendor/
+.DS_Store
+project1/.DS_Store
+project1/libs/.DS_Store
+project1/libs/js/.DS_Store
