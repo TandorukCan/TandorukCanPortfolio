@@ -61,7 +61,7 @@ export const setExchangeRate = (currency) => {
     })
     .then((data) => {
       document.getElementById("exchangeRate").innerText = `${(
-        1 / parseFloat(data.rates[currency])
+        1 / parseFloat(data.conversion_rates[currency])
       ).toFixed(3)} $`;
     })
     .catch((error) => {

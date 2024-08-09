@@ -13,7 +13,7 @@ error_reporting(E_ALL);
 
 $executionStartTime = microtime(true);
 
-$url = 'https://openexchangerates.org/api/latest.json?app_id='. $exchangeKey;
+$url = 'https://v6.exchangerate-api.com/v6/'. $exchangeKey .'/latest/USD';
 
 
 $ch = curl_init();
