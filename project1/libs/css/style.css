@@ -227,6 +227,15 @@ body {
   -webkit-animation: animate-preloader 1s linear infinite;
   animation: animate-preloader 1s linear infinite;
 }
+
+.fa-wikipedia-w {
+  margin-left: -2px;
+}
+
+.fa-umbrella {
+  margin-left: -0.5px;
+}
+
 @-webkit-keyframes animate-preloader {
   0% {
     -webkit-transform: rotate(0deg);
