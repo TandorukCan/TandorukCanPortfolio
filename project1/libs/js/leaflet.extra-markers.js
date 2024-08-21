@@ -193,5 +193,3 @@
 
   Object.defineProperty(exports, "__esModule", { value: true });
 });
-
-//# sourceMappingURL=leaflet.extra-markers.js.map

@@ -13,15 +13,21 @@ const fetchGetOptions = {
   },
 };
 
+const camelToFlat = (camel) => {
+  const flatCase = camel.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+  return flatCase.toLowerCase();
+};
+
 export async function getLocationCoordinates(countryCode) {
-  const url = "libs/countryBorders.geo.json";
   try {
-    const response = await fetch(url);
+    const response = await fetch("libs/php/retrieveCountryBorders.php");
     if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const countries = await response.json();
+    const data = await response.json();
+    const countries = data.data;
     const selectedCountry = countries.features.filter((country) => {
       return country.properties.iso_a2 === countryCode;
     });
@@ -73,7 +79,8 @@ export async function retrieveGeoInfo(latitude, longitude) {
   const url = `libs/php/retrieveWeatherReverseGeo.php?lat=${encodeURIComponent(
     latitude
   )}&lon=${encodeURIComponent(longitude)}`;
-
+  // console.log(encodeURIComponent(latitude));
+  // console.log(encodeURIComponent(longitude));
   const url2 = `libs/php/findNearbyPlaceName.php?lat=${encodeURIComponent(
     latitude
   )}&lng=${encodeURIComponent(longitude)}`;
@@ -81,11 +88,13 @@ export async function retrieveGeoInfo(latitude, longitude) {
   try {
     const response = await fetch(url, fetchGetOptions);
     const json = await response.json();
+    // console.log(json);
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
     const response2 = await fetch(url2, fetchGetOptions);
     const json2 = await response2.json();
+    // console.log(json2);
     if (!response2.ok) {
       throw new Error(`Response status: ${response2.status}`);
     }
@@ -114,7 +123,8 @@ export const retrieveWeatherInfo = async (lat, lon) => {
   )}&lon=${encodeURIComponent(lon)}`;
 
   try {
-    showElement("preloader");
+    document.getElementById("weatherloader").classList.remove("fadeOut");
+    // showElement("weatherloader");
     const response = await fetch(url, fetchGetOptions);
     const response2 = await fetch(url2, fetchGetOptions);
     if (!response.ok) {
@@ -125,7 +135,8 @@ export const retrieveWeatherInfo = async (lat, lon) => {
     }
     const json = await response.json();
     const json2 = await response2.json();
-    hideElement("preloader");
+    // hideElement("weatherloader");
+    document.getElementById("weatherloader").classList.add("fadeOut");
 
     const date = json2.date;
     const time_zone = "GMT " + json2.tz;
@@ -139,7 +150,7 @@ export const retrieveWeatherInfo = async (lat, lon) => {
     const summary = json2.weather_overview;
 
     const elementsToUpdate = [
-      { id: "date", value: date },
+      { id: "date", value: Date.parse(date).toString("ddd, dS MMM yy") },
       { id: "time_zone", value: time_zone },
       { id: "units", value: units },
       { id: "description", value: description },
@@ -161,7 +172,8 @@ export const retrieveWeatherInfo = async (lat, lon) => {
 
 export const retrieveCities = async (iso2, siso2, element, cityname) => {
   //last parameter is optional, for when the geodata is retrieved for the first time
-  showElement("preloader");
+  // showElement("weatherloader");
+  document.getElementById("weatherloader").classList.remove("fadeOut");
   element.classList.add("btn-disable");
   try {
     const response = await fetch(
@@ -177,6 +189,7 @@ export const retrieveCities = async (iso2, siso2, element, cityname) => {
       element.replaceChildren();
       element.innerHTML = `<option value="">No City Available</option>`;
       element.classList.add("btn-disable");
+      document.getElementById("weatherloader").classList.add("fadeOut");
       return {
         iso2: iso2,
         siso2: siso2,
@@ -184,7 +197,8 @@ export const retrieveCities = async (iso2, siso2, element, cityname) => {
       // retrieveStateGeoLocation(iso2, siso2);
     } else {
       cities.forEach((city) => {
-        hideElement("preloader");
+        document.getElementById("weatherloader").classList.add("fadeOut");
+        // hideElement("weatherloader");
         const option = document.createElement("option");
         option.value = `${city.latitude}, ${city.longitude}, ${city.name}`;
         option.textContent = city.name;
@@ -200,9 +214,9 @@ export const retrieveCities = async (iso2, siso2, element, cityname) => {
 };
 
 export const retrieveWiki = async (country) => {
-  hideElement("wikiLink");
-  hideElement("wikiImage");
-  showElement("wikiLoader");
+  // hideElement("wikiLink");
+  // hideElement("wikiImage");
+  // showElement("wikiLoader");
 
   const url = `libs/php/wikipediaSearch.php?country=${encodeURIComponent(
     country
@@ -219,9 +233,9 @@ export const retrieveWiki = async (country) => {
     }
 
     const json = await response.json();
-    showElement("wikiLink");
-    showElement("wikiImage");
-    hideElement("wikiLoader");
+    // showElement("wikiLink");
+    // showElement("wikiImage");
+    // hideElement("wikiLoader");
     const detailsArray = json;
     const selectedDetail = detailsArray.filter((detail) => {
       return detail.title === country;
@@ -245,14 +259,15 @@ export const retrieveWiki = async (country) => {
       document.getElementById("wikiImage").src = selectedDetail[0].thumbnailImg;
     }
     document.getElementById("wikiTitle").innerText = selectedDetail[0].title;
+    document.getElementById("wikiLoader").classList.add("fadeOut");
   } catch (error) {
     console.log(error.message);
   }
 };
 
 export const retrieveNews = async (country) => {
-  showElement("newsLoader");
-
+  // showElement("newsLoader");
+  document.getElementById("newsLoader").classList.remove("fadeOut");
   const url = `libs/php/retrieveNews.php?country=${encodeURIComponent(
     country
   )}`;
@@ -266,9 +281,10 @@ export const retrieveNews = async (country) => {
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
-
+    console.log(response);
     const articles = await response.json();
-    hideElement("newsLoader");
+    console.log(articles);
+    // hideElement("newsLoader");
     const newsList = document.getElementById("newsList");
 
     if (newsList.children.length === 0) {
@@ -290,17 +306,19 @@ export const retrieveNews = async (country) => {
         article.title
       }</a></td>
           <td>${article.author || "Unknown"}</td>
-          <td>${new Date(article.publishedAt).toLocaleDateString()}</td>
+          <td>${Date.parse(article.publishedAt).toString("ddd, dS MMM yy")}</td>
       `;
       newsList.appendChild(tr);
     });
+    document.getElementById("newsLoader").classList.add("fadeOut");
   } catch (error) {
     console.log(error.message);
   }
 };
 
 export const retrieveCovidStats = async (country) => {
-  showElement("covidLoader");
+  // showElement("covidLoader");
+  document.getElementById("covidLoader").classList.remove("fadeOut");
   const covidList = document.getElementById("covidList");
   covidList.innerHTML = "";
 
@@ -319,7 +337,8 @@ export const retrieveCovidStats = async (country) => {
     }
 
     const stats = await response.json();
-    hideElement("covidLoader");
+    // hideElement("covidLoader");
+
     for (let i = 0; i < Object.keys(stats).length; i++) {
       if (
         Object.keys(stats)[i] !== "country" &&
@@ -328,11 +347,16 @@ export const retrieveCovidStats = async (country) => {
         if (Object.keys(stats)[i] === "updated") {
           var milliseconds = stats[Object.keys(stats)[i]];
           var date = new Date(milliseconds);
-          stats[Object.keys(stats)[i]] = date.toString();
+          console.log(Date.parse(date).toString("ddd, dS MMM yy"));
+          stats[Object.keys(stats)[i]] = Date.parse(date).toString(
+            "ddd, dS MMM yy, HH:mm:ss tt"
+          );
         }
         const tr = document.createElement("tr");
+        const td = camelToFlat(initialToUpperCase(Object.keys(stats)[i]));
+
         tr.innerHTML = `
-          <td>${initialToUpperCase(Object.keys(stats)[i])}</td>
+          <td>${td[0].toUpperCase() + td.slice(1)}</td>
           <td>${
             isNaN(stats[Object.keys(stats)[i]])
               ? stats[Object.keys(stats)[i]]
@@ -343,6 +367,7 @@ export const retrieveCovidStats = async (country) => {
         covidList.appendChild(tr);
       }
     }
+    document.getElementById("covidLoader").classList.add("fadeOut");
   } catch (error) {
     console.log(error.message);
   }
@@ -350,7 +375,8 @@ export const retrieveCovidStats = async (country) => {
 
 export async function retrieveStates(countryId, currentStateName, ciso2) {
   //last parameter is optional, for when the geodata is retrieved for the first time
-  showElement("preloader");
+  // showElement("weatherloader");
+  document.getElementById("weatherloader").classList.remove("fadeOut");
   stateSelect.classList.add("btn-disable");
 
   try {
@@ -359,7 +385,8 @@ export async function retrieveStates(countryId, currentStateName, ciso2) {
       fetchGetOptions
     );
     const states = await response.json();
-    hideElement("preloader");
+    // hideElement("weatherloader");
+    document.getElementById("weatherloader").classList.add("fadeOut");
     stateSelect.classList.remove("btn-disable");
 
     const selectedState = states.filter((state) => {
@@ -392,14 +419,16 @@ export async function retrieveStates(countryId, currentStateName, ciso2) {
     return statesObject; // Ensure this is returned
   } catch (error) {
     console.log("error", error);
-    hideElement("preloader");
+    // hideElement("weatherloader");
+    document.getElementById("weatherloader").classList.add("fadeOut");
     stateSelect.classList.remove("btn-disable");
     return {}; // Return an empty object in case of error
   }
 }
 
 export const retrieveOverview = async (countryCode) => {
-  showElement("overviewLoader");
+  // showElement("overviewLoader");
+  document.getElementById("overviewLoader").classList.remove("fadeOut");
   hideElement("flag");
 
   const url = `libs/php/retrieveOverview.php?country=${encodeURIComponent(
@@ -416,7 +445,8 @@ export const retrieveOverview = async (countryCode) => {
       throw new Error(`Response status: ${response.status}`);
     }
     const json = await response.json();
-    hideElement("overviewLoader");
+    // hideElement("overviewLoader");
+    document.getElementById("overviewLoader").classList.add("fadeOut");
     showElement("flag");
 
     const {
@@ -483,7 +513,7 @@ export const countryCodeToGeonameId = async (countryCode) => {
       throw new Error(`Response status: ${response.status}`);
     }
     const json = await response.json();
-    console.log(json);
+    // console.log(json);
     const { geonameId } = json;
     return geonameId;
     //return capital for later use

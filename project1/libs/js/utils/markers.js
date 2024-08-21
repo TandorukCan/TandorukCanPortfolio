@@ -1,52 +1,52 @@
 let markerClusters = {};
 
-const uniIcon = L.icon({
-  iconUrl: "./libs/css/markers/university.png",
-  iconSize: [35, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const uniIcon = L.ExtraMarkers.icon({
+  prefix: "fa",
+  icon: "fa-graduation-cap",
+  markerColor: "pink",
+  shape: "square",
 });
 
-const parkIcon = L.icon({
-  iconUrl: "./libs/css/markers/park.png",
-  iconSize: [35, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const parkIcon = L.ExtraMarkers.icon({
+  prefix: "fa",
+  icon: "fa-tree",
+  markerColor: "green",
+  shape: "square",
 });
 
-const museumIcon = L.icon({
-  iconUrl: "./libs/css/markers/museum.png",
-  iconSize: [35, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const museumIcon = L.ExtraMarkers.icon({
+  prefix: "fa",
+  icon: "fa-landmark",
+  markerColor: "yellow",
+  shape: "square",
 });
 
 const amusementIcon = L.icon({
   iconUrl: "./libs/css/markers/amusement.png",
-  iconSize: [35, 41],
+  iconSize: [35, 35],
   iconAnchor: [0, 41],
   popupAnchor: [1, -34],
 });
 
-const stateIcon = L.icon({
-  iconUrl: "./libs/css/markers/b/state2.png",
-  iconSize: [35, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const stateIcon = L.ExtraMarkers.icon({
+  prefix: "fa",
+  icon: "fa-city",
+  markerColor: "blue",
+  shape: "square",
 });
 
-const zooIcon = L.icon({
-  iconUrl: "./libs/css/markers/zoo.png",
-  iconSize: [35, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const zooIcon = L.ExtraMarkers.icon({
+  prefix: "fa",
+  icon: "fa-paw",
+  markerColor: "orange",
+  shape: "square",
 });
 
-const capitalIcon = L.icon({
-  iconUrl: "./libs/css/markers/capital.png",
-  iconSize: [35, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+const capitalIcon = L.ExtraMarkers.icon({
+  prefix: "fa",
+  icon: "fa-landmark-flag",
+  markerColor: "black",
+  shape: "square",
 });
 
 const fetchUniData = async (countryCode) => {
@@ -124,7 +124,13 @@ const fetchMarkerData = async (layerControl, countryCode, map) => {
       map,
       true
     );
-    addMarkersToCluster(layerControl, stateData, "States", stateIcon, map);
+    addMarkersToCluster(
+      layerControl,
+      stateData,
+      "Densely Populated Areas",
+      stateIcon,
+      map
+    );
     addMarkersToCluster(layerControl, uniData, "Universities", uniIcon, map);
     addMarkersToCluster(layerControl, parkData, "Parks", parkIcon, map);
     addMarkersToCluster(layerControl, museumData, "Museums", museumIcon, map);
@@ -161,7 +167,15 @@ const addMarkersToCluster = (
         : `${place.name}, ${place.adminName1}`
     )
   );
-  const markerClusterGroup = L.markerClusterGroup();
+  const markerClusterGroup = L.markerClusterGroup({
+    polygonOptions: {
+      fillColor: "#fff",
+      color: "#000",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.5,
+    },
+  });
   markerClusterGroup.addLayers(markersArray);
 
   layerControl.addOverlay(markerClusterGroup, layerName);

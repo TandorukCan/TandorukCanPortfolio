@@ -34,7 +34,7 @@ let longitude;
 const countrySelect = document.getElementById("countrySelect");
 const stateSelect = document.getElementById("stateSelect");
 const citySelect = document.getElementById("citySelect");
-let countryCoordinates;
+let countryFeatures;
 
 let geojsonLayer;
 const overlayMaps = {};
@@ -52,9 +52,9 @@ let isInfoModalHidden = false;
 
 // Logic start here
 
-const setupInterface = (countryCode) => {
+const setupInterface = (countryCode, fly) => {
+  drawCountryBorder(countryCode, fly); //drawing users country by calling drawCountryBorder function.
   retrieveFlag(countryCode);
-  drawCountryBorder(countryCode); //drawing users country by calling drawCountryBorder function.
   retrieveOverview(countryCode);
   retrieveNews(countryCode);
   retrieveCovidStats(countryCode);
@@ -117,20 +117,49 @@ const createCountryDropdown = async (iso2) => {
 //creating a promise for geolocation API because it takes some time to get the data from the user
 const getLocationPromise = () => {
   return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(resolve, reject);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve(position); // Successfully retrieved position
+      },
+      (error) => {
+        console.error(`Geolocation error: ${error.message}`);
+        reject(error); // Handle geolocation error
+      },
+      {
+        timeout: 10000, // Optional: Set a timeout (in milliseconds)
+        maximumAge: 60000, // Optional: Use cached position for up to 1 minute
+        enableHighAccuracy: true, // Optional: Request high-accuracy position
+      }
+    );
   });
 };
 
-async function drawCountryBorder(countryCode) {
+async function drawCountryBorder(countryCode, fly) {
   try {
     if (geojsonLayer) {
       geojsonLayer.clearLayers();
     }
-    countryCoordinates = await getLocationCoordinates(countryCode);
-
+    countryFeatures = await getLocationCoordinates(countryCode);
     // drawing the country borders based on the coordinates received
-    geojsonLayer = L.geoJSON(countryCoordinates).addTo(map);
-    map.flyToBounds(geojsonLayer.getBounds(), { duration: 2 }); //trying this instead of map.flyTo
+    console.log(countryFeatures); //will be removed in production
+    geojsonLayer = L.geoJSON(countryFeatures, {
+      fillColor: "#fff",
+      color: "#000",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.3,
+    });
+
+    if (fly) {
+      document.getElementById("wikiLoader").classList.remove("fadeOut");
+      map.flyToBounds(geojsonLayer.getBounds(), { duration: 2 }); //trying this instead of map.flyTo
+      setTimeout(() => {
+        geojsonLayer.addTo(map);
+      }, "2000");
+    } else {
+      geojsonLayer.addTo(map);
+      map.fitBounds(geojsonLayer.getBounds());
+    }
   } catch (error) {
     console.error(error.message);
   }
@@ -198,23 +227,18 @@ const covidBtn = L.easyButton("fa-solid fa-virus-covid fa-xl", (btn, map) => {
 // initialise and add controls once DOM is ready
 
 document.addEventListener("DOMContentLoaded", async () => {
-  showElement("mainLoader");
-  await getLocationPromise()
-    .then((res) => {
-      // If promise get resolved
-      const { coords } = res;
-      console.log(
-        `User's location is: ${coords.latitude}, ${coords.longitude}`
-      ); //will be removed in production
-      latitude = coords.latitude;
-      longitude = coords.longitude;
-    })
-    .catch((error) => {
-      // If promise get rejected
-      console.log(`User denied the request for geolocation.: ${error}`); //will be removed in production
-      latitude = 54.5;
-      longitude = -4;
-    });
+  // showElement("mainLoader");
+  try {
+    const res = await getLocationPromise();
+    const { coords } = res;
+    console.log(`User's location is: ${coords.latitude}, ${coords.longitude}`); //will be removed in production
+    latitude = coords.latitude;
+    longitude = coords.longitude;
+  } catch (error) {
+    console.log(`Geolocation error: ${error.message}`); // Log the specific error message
+    latitude = 54.5; // Default latitude
+    longitude = -4; // Default longitude
+  }
 
   map = L.map("map", {
     layers: [streets],
@@ -239,18 +263,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (selectedCountry) {
     retrieveWiki(selectedCountry);
   }
-  hideElement("mainLoader");
+
   setupInterface(countryCode);
-  await retrieveStates(countryId, currentStateName, currentSiso2);
-  await retrieveCities(countryCode, currentSiso2, citySelect, currentCityName);
   retrieveWeatherInfo(latitude, longitude);
 
-  //added a marker to let the user know of their current location
-  let marker = L.marker([latitude, longitude], 500).addTo(map);
-  marker.bindPopup("This is your location");
   fetchMarkerData(layerControl, countryCode, map);
+  await retrieveStates(countryId, currentStateName, currentSiso2);
+  await retrieveCities(countryCode, currentSiso2, citySelect, currentCityName);
+  document.getElementById("mainLoader").classList.add("fadeOut");
+  // hideElement("mainLoader");
 
   async function onMapClick(e) {
+    // showElement("mainLoader");
     const data = await retrieveGeoInfo(e.latlng.lat, e.latlng.lng);
     // setting up the global location variables to find the country, state and the city that the user is in when they login
     if (data) {
@@ -268,14 +292,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       countryId = data.countryId;
     }
     resetAllFields();
-    hideElement("mainLoader");
-    setupInterface(countryCode);
+    setupInterface(countryCode, true);
+    fetchMarkerData(layerControl, countryCode, map);
     await retrieveStates(countryId, currentStateName);
     const selectedCountry = await createCountryDropdown(countryCode);
     if (selectedCountry) {
       retrieveWiki(selectedCountry);
     }
-    fetchMarkerData(layerControl, countryCode, map);
+    // hideElement("mainLoader");
   }
 
   map.on("click", onMapClick);
@@ -375,6 +399,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   countrySelect.addEventListener("change", async (e) => {
+    document.getElementById("mainLoader").classList.remove("fadeOut");
+    // showElement("mainLoader");
     resetCurrentLocation();
     if (countrySelect.value !== "") {
       const countryArray = e.target.value.split(", ");
@@ -383,9 +409,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const selectedCountry = countryArray[1];
       resetAllFields();
       setupInterface(countryCode);
-      await retrieveStates(countryId, currentStateName);
       retrieveWiki(selectedCountry);
       fetchMarkerData(layerControl, countryCode, map);
+      await retrieveStates(countryId, currentStateName);
+      // hideElement("mainLoader");
+      document.getElementById("mainLoader").classList.add("fadeOut");
     }
   });
 

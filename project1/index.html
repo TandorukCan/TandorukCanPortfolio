@@ -23,10 +23,7 @@
   <body>
     <div id="mainLoader"></div>
     <span id="selectContainer">
-      <p id="selectTitle" class="text-center shadow-sm bg-white">
-        Choose A Country
-      </p>
-      <select id="countrySelect" class="text-center form-select shadow-sm">
+      <select id="countrySelect" class="form-select shadow-sm">
         <!-- populate from fetch CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
         <option value=""></option>
       </select>
@@ -49,6 +46,7 @@
             ></button>
           </div>
           <div class="modal-body">
+            <div id="overviewLoader"></div>
             <table class="table table-striped">
               <img id="flag" src="" alt="flag" />
               <tr>
@@ -145,7 +143,6 @@
               Close
             </button>
           </div>
-          <div id="overviewLoader"></div>
         </div>
       </div>
     </div>
@@ -163,12 +160,13 @@
             ></button>
           </div>
           <div class="modal-body">
+            <div id="weatherloader"></div>
             <table class="table table-striped">
-              <div id="loader">
+              <!-- <div id="loader">
                 <div class="progress">
                   <div class="indeterminate"></div>
                 </div>
-              </div>
+              </div> -->
               <tr>
                 <td class="text-center align-middle">
                   <i class="fa-solid fa-landmark-flag fa-xl text-warning"></i>
@@ -297,7 +295,6 @@
               Close
             </button>
           </div>
-          <div id="preloader"></div>
         </div>
       </div>
     </div>
@@ -315,6 +312,7 @@
             ></button>
           </div>
           <div class="modal-body">
+            <div id="wikiLoader"></div>
             <table class="table table-striped">
               <h4 id="wikiTitle" class="text-center"></h4>
               <img id="wikiImage" src="" alt="image of the country" />
@@ -351,7 +349,6 @@
               Close
             </button>
           </div>
-          <div id="wikiLoader"></div>
         </div>
       </div>
     </div>
@@ -369,6 +366,7 @@
             ></button>
           </div>
           <div class="modal-body">
+            <div id="newsLoader"></div>
             <table class="table table-striped">
               <tbody id="newsList"></tbody>
             </table>
@@ -382,7 +380,6 @@
               Close
             </button>
           </div>
-          <div id="newsLoader"></div>
         </div>
       </div>
     </div>
@@ -399,6 +396,7 @@
             ></button>
           </div>
           <div class="modal-body">
+            <div id="covidLoader"></div>
             <table class="table table-striped">
               <tbody id="covidList"></tbody>
             </table>
@@ -412,10 +410,12 @@
               Close
             </button>
           </div>
-          <div id="covidLoader"></div>
         </div>
       </div>
     </div>
+
+    <!-- Set the CultureInfo to en-GB (English) -->
+    <script type="text/javascript" src="libs/js/date-en-GB.js"></script>
 
     <script type="application/javascript" src="libs/js/leaflet.js"></script>
     <script
@@ -433,6 +433,10 @@
     <script
       type="application/javascript"
       src="libs/js/easy-button.min.js"
+    ></script>
+    <script
+      type="application/javascript"
+      src="libs/js/leaflet.extra-markers.js"
     ></script>
     <script type="module" src="libs/js/script.js"></script>
   </body>
