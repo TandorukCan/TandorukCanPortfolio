@@ -12,6 +12,12 @@ export const updateElements = (elements) => {
   });
 };
 
+export const updateIcons = (elements) => {
+  elements.forEach((element) => {
+    document.getElementById(element.id).src = element.value;
+  });
+};
+
 export const setContinentClass = (continentName) => {
   if (continentName === "Asia") {
     document.getElementById("contClass").className =

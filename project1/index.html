@@ -150,8 +150,9 @@
     <div id="weatherModal" class="modal" data-bs-backdrop="false" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content shadow">
+          <div id="weatherloader"></div>
           <div class="modal-header bg-warning bg-gradient text-white">
-            <h5 class="modal-title">Weather Overview</h5>
+            <h5 id="weatherModalLabel" class="modal-title"></h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -160,131 +161,131 @@
             ></button>
           </div>
           <div class="modal-body">
-            <div id="weatherloader"></div>
-            <table class="table table-striped">
-              <!-- <div id="loader">
-                <div class="progress">
-                  <div class="indeterminate"></div>
+            <!-- <div class="row">
+              <div class="col border m-2">
+                <div class="row">
+                  <div class="col m-1">
+                    <img
+                      id="todayIcon"
+                      class="img-fluid mt-0"
+                      src="//cdn.weatherapi.com/weather/64x64/day/116.png"
+                      alt=""
+                      title=""
+                    />
+                    <p id="todayConditions" class="fw-bold fs-6">
+                      Partly cloudy
+                    </p>
+                  </div>
                 </div>
-              </div> -->
-              <tr>
-                <td class="text-center align-middle">
-                  <i class="fa-solid fa-landmark-flag fa-xl text-warning"></i>
-                </td>
-                <td class="align-middle">State</td>
-                <td id="stateSelectContainer" class="text-end">
-                  <select id="stateSelect" class="form-select shadow-sm">
-                    <!-- populate from an AJAX CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
-                    <option value="">Choose A State</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center align-middle">
-                  <i class="fa-solid fa-city fa-xl text-warning"></i>
-                </td>
-                <td class="align-middle">City</td>
-                <td id="citySelectContainer" class="text-end">
-                  <select id="citySelect" class="form-select shadow-sm">
-                    <!-- populate from an AJAX CALL to a PHP routine that returns a JSON object that is an array of just ISO codes and names from countryBorders.geo.json -->
-                    <option id="choose_a_city" value="">Choose A City</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-regular fa-calendar fa-xl text-warning"></i>
-                </td>
+                <div class="row">
+                  <div class="col mt-4 ms-3">
+                    <p id="weatherModalLabel" class="row mb-1"></p>
+                    <p id="todaysDate" class="row mb-0">13:45 THU,29 AUG</p>
+                  </div>
+                  <div class="col text-end mt-3 me-3">
+                    <p class="fw-bold fs-4 mb-0 me-1">
+                      <span id="temperature"></span><sup>o</sup
+                      ><span class="tempMetric">c</span>
+                    </p>
+                    <p class="col fs-5 mt-0 text-secondary">
+                      <span id="todayMaxTemp"></span><sup>o</sup>/<span
+                        id="todayMinTemp"
+                        >18.1</span
+                      ><sup>o</sup>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+            <div class="row">
+              <div class="col border m-2">
+                <div class="mt-2 row">
+                  <p class="col text-start fw-bold fs-6 ms-2 mt-1">TODAY</p>
+                  <div class="col text-end me-1">
+                    <p id="todaysDate" class="fw-bold fs-6 mt-1"></p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="text-start col">
+                    <img
+                      id="todayIcon"
+                      class="img-fluid mt-0"
+                      src="//cdn.weatherapi.com/weather/64x64/day/302.png"
+                      alt=""
+                      title=""
+                    />
 
-                <td>Date</td>
+                    <p
+                      id="todayConditions"
+                      class="fs-6 ms-2 mb-3 text-secondary"
+                    ></p>
+                  </div>
+                  <div class="text-end col mt-3 ms-2">
+                    <p class="fw-bold fs-4 mb-1 me-1">
+                      <span id="temperature"></span><sup>o</sup
+                      ><span class="tempMetric">c</span>
+                    </p>
+                    <p class="col fs-5 mt-0 text-secondary">
+                      <span id="todayMaxTemp"></span><sup>o</sup>/<span
+                        id="todayMinTemp"
+                        >14.9</span
+                      ><sup>o</sup>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col border m-2">
+                <div class="row">
+                  <div class="col text-center">
+                    <p id="day1Date" class="fw-bold fs-6 mt-3"></p>
+                  </div>
+                </div>
 
-                <td id="date" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-clock fa-xl text-warning"></i>
-                </td>
+                <div class="row">
+                  <div class="col text-start">
+                    <img id="day1Icon" src="" alt="" title="" />
+                  </div>
+                  <div class="col text-end">
+                    <p class="fw-bold fs-4 mb-0 me-1">
+                      <span id="day1AvgTemp"></span><sup>o</sup>c
+                    </p>
+                    <p class="fs-5 mt-0 text-secondary">
+                      <span id="day1MinTemp"></span><sup>o</sup>/<span
+                        id="day1MaxTemp"
+                      ></span
+                      ><sup>o</sup>
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-                <td>Time Zone</td>
+              <div class="col border m-2">
+                <div class="row">
+                  <div class="col text-center">
+                    <p id="day2Date" class="fw-bold fs-6 mt-3"></p>
+                  </div>
+                </div>
 
-                <td id="time_zone" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-scale-balanced fa-xl text-warning"></i>
-                </td>
-
-                <td>Units</td>
-
-                <td id="units" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-umbrella fa-xl text-warning"></i>
-                </td>
-
-                <td>Weather Condition</td>
-
-                <td id="description" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i
-                    class="fa-solid fa-temperature-half fa-xl text-warning"
-                  ></i>
-                </td>
-
-                <td>Temperature</td>
-
-                <td id="temperature" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i
-                    class="fa-solid fa-temperature-half fa-xl text-warning"
-                  ></i>
-                </td>
-
-                <td>Feels Like</td>
-
-                <td id="feels_like" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-water fa-xl text-warning"></i>
-                </td>
-
-                <td>Humidity</td>
-
-                <td id="humidity" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-compass fa-xl text-warning"></i>
-                </td>
-
-                <td>Wind Direction</td>
-
-                <td id="wind_direction" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-wind fa-xl text-warning"></i>
-                </td>
-
-                <td>Wind Speed</td>
-
-                <td id="wind_speed" class="text-end"></td>
-              </tr>
-              <tr>
-                <td class="text-center">
-                  <i class="fa-solid fa-clipboard-list fa-xl text-warning"></i>
-                </td>
-                <td>Summary</td>
-
-                <td id="summary" class="text-end"></td>
-              </tr>
-            </table>
+                <div class="row">
+                  <div class="col text-start">
+                    <img id="day2Icon" src="" alt="" title="" />
+                  </div>
+                  <div class="col text-end">
+                    <p class="fw-bold fs-4 mb-0 me-1">
+                      <span id="day2AvgTemp"></span><sup>o</sup>c
+                    </p>
+                    <p class="fs-5 mt-0 text-secondary">
+                      <span id="day2MinTemp"></span><sup>o</sup>/<span
+                        id="day2MaxTemp"
+                      ></span
+                      ><sup>o</sup>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -367,9 +368,10 @@
           </div>
           <div class="modal-body">
             <div id="newsLoader"></div>
-            <table class="table table-striped">
+            <div id="newsList"></div>
+            <!-- <div id="newsList" class="table table-striped">
               <tbody id="newsList"></tbody>
-            </table>
+            </div> -->
           </div>
           <div class="modal-footer">
             <button
@@ -405,6 +407,40 @@
             <button
               type="button"
               class="btn btn-outline-danger btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Error Modal -->
+    <div
+      class="modal fade"
+      id="errorModal"
+      tabindex="-1"
+      aria-labelledby="errorModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog h-100">
+        <div class="modal-content h-75">
+          <div class="modal-header bg bg-danger">
+            <h5 class="modal-title text-white" id="errorModalLabel">Error</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body text-danger" id="errorMessage">
+            <!-- Error message will be inserted here -->
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-danger"
               data-bs-dismiss="modal"
             >
               Close

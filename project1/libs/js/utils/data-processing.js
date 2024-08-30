@@ -22,14 +22,13 @@ export const resetWeatherData = () => {
   resetInnertext([
     "date",
     "time_zone",
-    "units",
     "description",
     "temperature",
     "feels_like",
     "humidity",
     "wind_direction",
     "wind_speed",
-    "summary",
+    // "summary",
   ]);
 };
 
@@ -49,24 +48,9 @@ export const resetNewsData = () => {
   newsList.appendChild(headerRow);
 };
 
-export const resetStateData = () => {
-  stateSelect.replaceChildren();
-  stateSelect.appendChild(document.createElement("option")).textContent =
-    "Choose A State";
-};
-
-export const resetCityData = () => {
-  citySelect.replaceChildren();
-  citySelect.appendChild(document.createElement("option")).textContent =
-    "Choose A City";
-  citySelect.classList.remove("btn-disable");
-};
-
 export const resetAllFields = () => {
   resetOverview();
   resetWeatherData();
-  resetStateData();
-  resetCityData();
   resetWikiData();
   resetNewsData();
 };

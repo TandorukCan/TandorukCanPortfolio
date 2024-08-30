@@ -4,26 +4,19 @@
 // GLOBAL DECLARATIONS
 // ---------------------------------------------------------
 
-import {
-  resetWeatherData,
-  resetCityData,
-  resetAllFields,
-} from "./utils/data-processing.js";
+import { resetAllFields } from "./utils/data-processing.js";
 
 import { hideElement, showElement } from "./utils/utility.js";
 
 import {
   retrieveFlag,
-  retrieveGeoInfo,
-  retrieveWeatherInfo,
-  retrieveCities,
-  retrieveWiki,
-  retrieveStates,
-  retrieveOverview,
-  getLocationCoordinates,
-  countryCodeToGeonameId,
   retrieveNews,
   retrieveCovidStats,
+  retrieveOverview,
+  retrieveWeather,
+  retrieveCountryCode,
+  retrieveWiki,
+  getLocationCoordinates,
 } from "./utils/data-fetching.js";
 
 import fetchMarkerData from "./utils/markers.js";
@@ -32,42 +25,43 @@ let map;
 let latitude;
 let longitude;
 const countrySelect = document.getElementById("countrySelect");
-const stateSelect = document.getElementById("stateSelect");
-const citySelect = document.getElementById("citySelect");
 let countryFeatures;
 
 let geojsonLayer;
 const overlayMaps = {};
 
 let countryCode;
-let countryId;
-
-let currentStateName;
-let currentSiso2;
-
-let currentCityName;
-
 let modal; // will be removed if necessary
 let isInfoModalHidden = false;
 
 // Logic start here
 
-const setupInterface = (countryCode, fly) => {
-  drawCountryBorder(countryCode, fly); //drawing users country by calling drawCountryBorder function.
-  retrieveFlag(countryCode);
-  retrieveOverview(countryCode);
-  retrieveNews(countryCode);
-  retrieveCovidStats(countryCode);
-};
+const setupInterface = async (countryCode, layerControl, map, fly) => {
+  try {
+    await drawCountryBorder(countryCode, layerControl, map, fly); // Drawing user's country by calling drawCountryBorder function
+    const response = await fetch(
+      `libs/php/retrieveModals.php?country=${countryCode}`
+    );
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+    const data = await response.json();
 
-const resetCurrentLocation = () => {
-  currentCityName = "";
-  currentStateName = "";
+    retrieveFlag(countryCode);
+    // console.log(data.data.news); // Access news articles
+    retrieveNews(data.data.news);
+    retrieveCovidStats(data.data.covidStats);
+    retrieveOverview(data.data.overview);
+    // console.log(data.data.weather); // Access weather data
+    retrieveWeather(data.data.weather);
+
+    document.getElementById("mainLoader").classList.add("fadeOut");
+  } catch (error) {
+    console.error("Error:", error);
+  }
 };
 
 const createCountryDropdown = async (iso2) => {
-  let countryArray = []; // Array to store country names for sorting
-  let countriesObject = {}; // Object to map country names to ISO codes
   let selectedCountry;
 
   try {
@@ -77,26 +71,16 @@ const createCountryDropdown = async (iso2) => {
     }
 
     const data = await response.json();
-    const countries = data.data.features;
-
-    // Populate the countryArray and countriesObject
-    countries.forEach((country) => {
-      countryArray.push(country.properties.name);
-      countriesObject[country.properties.name] = country.properties.iso_a2;
-    });
-
-    // Sort country names alphabetically
-    countryArray.sort();
-
+    const countries = data.data;
     // Populate the dropdown with sorted country names
-    countryArray.forEach((country) => {
-      if (countriesObject[country] === iso2) {
-        selectedCountry = country;
+    countries.forEach((country) => {
+      if (country.iso_a2 === iso2) {
+        selectedCountry = country.name;
       }
       const option = document.createElement("option");
-      option.value = `${countriesObject[country]}, ${country}`;
-      option.text = country;
-      if (countriesObject[country] === iso2) {
+      option.value = `${country.iso_a2}, ${country.name}`;
+      option.text = country.name;
+      if (country.iso_a2 === iso2) {
         option.selected = true;
       }
       countrySelect.appendChild(option);
@@ -104,13 +88,21 @@ const createCountryDropdown = async (iso2) => {
     return selectedCountry;
   } catch (error) {
     console.error("Fetch Error:", error);
-    let errorMessage = "An error occurred while fetching country information.";
+    const errorMessage = document.getElementById("errorMessage");
     if (error.message.includes("400")) {
-      errorMessage = "Bad request. Please check your input parameters.";
+      errorMessage.textContent =
+        "Bad request. Please check your input parameters.";
     } else if (error.message.includes("500")) {
-      errorMessage = "Internal server error. Please try again later.";
+      errorMessage.textContent =
+        "Internal server error. Please try again later.";
+    } else {
+      errorMessage.textContent =
+        "An error occurred while fetching country information.";
     }
-    alert(errorMessage);
+
+    const errorModalElement = document.getElementById("errorModal");
+    const errorModal = new bootstrap.Modal(errorModalElement);
+    errorModal.show();
   }
 };
 
@@ -134,14 +126,13 @@ const getLocationPromise = () => {
   });
 };
 
-async function drawCountryBorder(countryCode, fly) {
+async function drawCountryBorder(countryCode, layerControl, map, fly) {
   try {
     if (geojsonLayer) {
       geojsonLayer.clearLayers();
     }
     countryFeatures = await getLocationCoordinates(countryCode);
     // drawing the country borders based on the coordinates received
-    console.log(countryFeatures); //will be removed in production
     geojsonLayer = L.geoJSON(countryFeatures, {
       fillColor: "#fff",
       color: "#000",
@@ -151,14 +142,19 @@ async function drawCountryBorder(countryCode, fly) {
     });
 
     if (fly) {
+      map.eachLayer((layer) => {
+        if (layer !== streets && layer !== satellite) {
+          map.removeLayer(layer);
+        }
+      });
       document.getElementById("wikiLoader").classList.remove("fadeOut");
-      map.flyToBounds(geojsonLayer.getBounds(), { duration: 2 }); //trying this instead of map.flyTo
-      setTimeout(() => {
-        geojsonLayer.addTo(map);
-      }, "2000");
-    } else {
+      map.flyToBounds(geojsonLayer.getBounds(), { duration: 2.5 }); //trying this instead of map.flyTo
+      await fetchMarkerData(layerControl, countryCode, map);
       geojsonLayer.addTo(map);
+    } else {
       map.fitBounds(geojsonLayer.getBounds());
+      await fetchMarkerData(layerControl, countryCode, map);
+      geojsonLayer.addTo(map);
     }
   } catch (error) {
     console.error(error.message);
@@ -190,36 +186,25 @@ let basemaps = {
   Satellite: satellite,
 };
 
-// buttons
-const infoBtn = L.easyButton("fa-info fa-xl", (btn, map) => {
-  const modalElement = document.getElementById("exampleModal");
-  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
-  modal.show();
-});
+const createModalButton = (iconClass, modalId) => {
+  return L.easyButton(iconClass, (btn, map) => {
+    const modalElement = document.getElementById(modalId);
+    modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  });
+};
 
-const weatherBtn = L.easyButton("fa-umbrella fa-xl", (btn, map) => {
-  const modalElement = document.getElementById("weatherModal");
-  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
-  modal.show();
-});
-
-const wikiBtn = L.easyButton("fa-brands fa-wikipedia-w fa-xl", (btn, map) => {
-  const modalElement = document.getElementById("wikiModal");
-  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
-  modal.show();
-});
-
-const newsBtn = L.easyButton("fa-solid fa-newspaper fa-xl", (btn, map) => {
-  const modalElement = document.getElementById("newsModal");
-  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
-  modal.show();
-});
-
-const covidBtn = L.easyButton("fa-solid fa-virus-covid fa-xl", (btn, map) => {
-  const modalElement = document.getElementById("covidModal");
-  modal = new bootstrap.Modal(modalElement); //removed const, made it global to test. revert back if not used
-  modal.show();
-});
+const infoBtn = createModalButton("fa-info fa-xl", "exampleModal");
+const weatherBtn = createModalButton("fa-umbrella fa-xl", "weatherModal");
+const wikiBtn = createModalButton(
+  "fa-brands fa-wikipedia-w fa-xl",
+  "wikiModal"
+);
+const newsBtn = createModalButton("fa-solid fa-newspaper fa-xl", "newsModal");
+const covidBtn = createModalButton(
+  "fa-solid fa-virus-covid fa-xl",
+  "covidModal"
+);
 // ---------------------------------------------------------
 // EVENT HANDLERS
 // ---------------------------------------------------------
@@ -231,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const res = await getLocationPromise();
     const { coords } = res;
-    console.log(`User's location is: ${coords.latitude}, ${coords.longitude}`); //will be removed in production
+    // console.log(`User's location is: ${coords.latitude}, ${coords.longitude}`); //will be removed in production
     latitude = coords.latitude;
     longitude = coords.longitude;
   } catch (error) {
@@ -247,35 +232,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   infoBtn.addTo(map);
   weatherBtn.addTo(map);
-  wikiBtn.addTo(map);
   newsBtn.addTo(map);
   covidBtn.addTo(map);
+  wikiBtn.addTo(map);
   map.setView(L.latLng(latitude, longitude), 5);
   // getting the country code of the country that relates to the user's geolocation
-  const data = await retrieveGeoInfo(latitude, longitude); // setting up the global location variables to find the country, state and the city that the user is in when they login
+  const data = await retrieveCountryCode(latitude, longitude); // setting up the global location variables to find the country, state and the city that the user is in when they login
   if (data) {
-    currentCityName = data.cityName;
-    currentSiso2 = data.stateCode;
     countryCode = data.countryCode;
-    countryId = data.countryId;
   }
+  setupInterface(countryCode, layerControl, map);
   const selectedCountry = await createCountryDropdown(countryCode);
   if (selectedCountry) {
     retrieveWiki(selectedCountry);
   }
 
-  setupInterface(countryCode);
-  retrieveWeatherInfo(latitude, longitude);
-
-  fetchMarkerData(layerControl, countryCode, map);
-  await retrieveStates(countryId, currentStateName, currentSiso2);
-  await retrieveCities(countryCode, currentSiso2, citySelect, currentCityName);
-  document.getElementById("mainLoader").classList.add("fadeOut");
-  // hideElement("mainLoader");
-
-  async function onMapClick(e) {
-    // showElement("mainLoader");
-    const data = await retrieveGeoInfo(e.latlng.lat, e.latlng.lng);
+  map.on("click", async (e) => {
+    document.getElementById("newsLoader").classList.remove("fadeOut");
+    document.getElementById("covidLoader").classList.remove("fadeOut");
+    document.getElementById("overviewLoader").classList.remove("fadeOut");
+    document.getElementById("weatherloader").classList.remove("fadeOut");
+    document.getElementById("wikiLoader").classList.remove("fadeOut");
+    const data = await retrieveCountryCode(e.latlng.lat, e.latlng.lng);
     // setting up the global location variables to find the country, state and the city that the user is in when they login
     if (data) {
       const clickedCountryCode = data.countryCode;
@@ -285,24 +263,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         return; // Skip the data retrieval if within the same country
       }
-
-      currentCityName = data.cityName;
-      currentSiso2 = data.stateCode;
       countryCode = data.countryCode;
-      countryId = data.countryId;
     }
-    resetAllFields();
-    setupInterface(countryCode, true);
-    fetchMarkerData(layerControl, countryCode, map);
-    await retrieveStates(countryId, currentStateName);
+    setupInterface(countryCode, layerControl, map, true);
     const selectedCountry = await createCountryDropdown(countryCode);
     if (selectedCountry) {
       retrieveWiki(selectedCountry);
     }
-    // hideElement("mainLoader");
-  }
-
-  map.on("click", onMapClick);
+  });
 
   const infoScreen = document.getElementsByClassName("modal-content shadow")[0];
   infoScreen.addEventListener("click", () => {
@@ -400,47 +368,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   countrySelect.addEventListener("change", async (e) => {
     document.getElementById("mainLoader").classList.remove("fadeOut");
-    // showElement("mainLoader");
-    resetCurrentLocation();
     if (countrySelect.value !== "") {
       const countryArray = e.target.value.split(", ");
       countryCode = countryArray[0];
-      const countryId = await countryCodeToGeonameId(countryCode);
       const selectedCountry = countryArray[1];
-      resetAllFields();
-      setupInterface(countryCode);
       retrieveWiki(selectedCountry);
-      fetchMarkerData(layerControl, countryCode, map);
-      await retrieveStates(countryId, currentStateName);
-      // hideElement("mainLoader");
-      document.getElementById("mainLoader").classList.add("fadeOut");
+      setupInterface(countryCode, layerControl, map);
     }
-  });
-
-  stateSelect.addEventListener("change", async (e) => {
-    const coordArray = e.target.value.split(", ");
-    const siso2 = coordArray[0];
-    const lat = coordArray[1];
-    const long = coordArray[2];
-    resetCurrentLocation();
-    resetWeatherData();
-    resetCityData();
-    const isoData = await retrieveCities(
-      countryCode,
-      siso2,
-      citySelect,
-      currentCityName
-    );
-    if (isoData) {
-      retrieveWeatherInfo(lat, long);
-    }
-  });
-
-  citySelect.addEventListener("change", (e) => {
-    const coordArray = e.target.value.split(",");
-    const lat = parseFloat(coordArray[0]);
-    const long = parseFloat(coordArray[1]);
-    resetWeatherData();
-    retrieveWeatherInfo(lat, long);
   });
 });

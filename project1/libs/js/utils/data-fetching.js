@@ -2,6 +2,7 @@ import {
   hideElement,
   showElement,
   updateElements,
+  updateIcons,
   setContinentClass,
   initialToUpperCase,
 } from "../utils/utility";
@@ -19,23 +20,23 @@ const camelToFlat = (camel) => {
   return flatCase.toLowerCase();
 };
 
-export async function getLocationCoordinates(countryCode) {
-  try {
-    const response = await fetch("libs/php/retrieveCountryBorders.php");
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+const formatDate = (date) => {
+  let time = null;
+  let transformedDate = "";
 
-    const data = await response.json();
-    const countries = data.data;
-    const selectedCountry = countries.features.filter((country) => {
-      return country.properties.iso_a2 === countryCode;
-    });
-    return selectedCountry;
-  } catch (error) {
-    console.error(error.message);
+  // Split the date into its components (year, month, day and time)
+  let [year, month, day] = date.split("-");
+  if (day.length > 2) {
+    [day, time] = day.split(" ");
   }
-}
+  // Rearrange the components to the desired format "YYYY-DD-MM"
+  if (time) {
+    transformedDate = `${year}-${day}-${month} ${time}`;
+  } else {
+    transformedDate = `${year}-${day}-${month}`;
+  }
+  return transformedDate;
+};
 
 export const retrieveFlag = (iso2) => {
   if (iso2 === "XK") {
@@ -57,167 +58,199 @@ export const retrieveFlag = (iso2) => {
   ).src = `https://flagsapi.com/${iso2}/flat/64.png`;
 };
 
-export const setExchangeRate = (currency) => {
-  fetch(`libs/php/retrieveExchangeRate.php`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      document.getElementById("exchangeRate").innerText = `${(
-        1 / parseFloat(data.conversion_rates[currency])
-      ).toFixed(3)} $`;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-export async function retrieveGeoInfo(latitude, longitude) {
-  const url = `libs/php/retrieveWeatherReverseGeo.php?lat=${encodeURIComponent(
-    latitude
-  )}&lon=${encodeURIComponent(longitude)}`;
-  // console.log(encodeURIComponent(latitude));
-  // console.log(encodeURIComponent(longitude));
-  const url2 = `libs/php/findNearbyPlaceName.php?lat=${encodeURIComponent(
-    latitude
-  )}&lng=${encodeURIComponent(longitude)}`;
-
+export const retrieveNews = (articles) => {
   try {
-    const response = await fetch(url, fetchGetOptions);
-    const json = await response.json();
-    // console.log(json);
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-    const response2 = await fetch(url2, fetchGetOptions);
-    const json2 = await response2.json();
-    // console.log(json2);
-    if (!response2.ok) {
-      throw new Error(`Response status: ${response2.status}`);
-    }
-    return {
-      cityName: json.name,
-      stateCode: json2.adminCode1,
-      countryCode: json2.countryCode,
-      countryId: json2.countryId,
-    };
+    const newsList = document.getElementById("newsList");
+    newsList.innerHTML = "";
+
+    // Populate the table with news articles
+    articles.forEach((article) => {
+      if (article.image_url !== null && article.description !== null) {
+        const table = document.createElement("table");
+        table.classList.add("table", "table-borderless", "mb-0");
+
+        // Limit the description to 100 characters, adding "..." if it's longer
+        const truncatedDescription =
+          article.description.length > 250
+            ? article.description.substring(0, 250) + "..."
+            : article.description;
+
+        table.innerHTML = `
+        <tr><td><h3>${article.title}</h3></td></tr>
+        <tr><td><img width="100%" class="img-fluid rounded" src="${article.image_url}" alt=""></td></tr>
+        <tr><td><a class="fs-6 text-black" href="${article.link}">${truncatedDescription}</a></td></tr>
+        <tr><td><blockquote class="fblockquote">
+        <p class="fw-light fs-6 mb-1">${article.source_name}</p>
+      </blockquote></td></tr>
+        `;
+
+        newsList.appendChild(table);
+        // Add the <hr> element after the table
+        const hr = document.createElement("hr");
+        newsList.appendChild(hr);
+      }
+    });
+    document.getElementById("newsLoader").classList.add("fadeOut");
   } catch (error) {
     console.log(error.message);
   }
-}
+};
 
-export const retrieveWeatherInfo = async (lat, lon) => {
-  if (lat === undefined || lon === undefined) {
-    return;
+export const retrieveCovidStats = (stats) => {
+  const covidList = document.getElementById("covidList");
+  covidList.innerHTML = "";
+  try {
+    for (let i = 0; i < Object.keys(stats).length; i++) {
+      if (
+        Object.keys(stats)[i] !== "country" &&
+        Object.keys(stats)[i] !== "countryInfo"
+      ) {
+        if (Object.keys(stats)[i] === "updated") {
+          var milliseconds = stats[Object.keys(stats)[i]];
+          var date = new Date(milliseconds);
+          stats[Object.keys(stats)[i]] = Date.parse(date).toString(
+            "ddd, dS MMM yy, HH:mm:ss tt"
+          );
+        }
+        const tr = document.createElement("tr");
+        const td = camelToFlat(initialToUpperCase(Object.keys(stats)[i]));
+
+        tr.innerHTML = `
+          <td>${td[0].toUpperCase() + td.slice(1)}</td>
+          <td>${
+            isNaN(stats[Object.keys(stats)[i]])
+              ? stats[Object.keys(stats)[i]]
+              : parseInt(stats[Object.keys(stats)[i]]).toLocaleString()
+          }</td>
+
+      `;
+        covidList.appendChild(tr);
+      }
+    }
+    document.getElementById("covidLoader").classList.add("fadeOut");
+  } catch (error) {
+    console.log(error.message);
   }
+};
 
-  const url = `libs/php/retrieveWeatherInfo.php?lat=${encodeURIComponent(
-    lat
-  )}&lon=${encodeURIComponent(lon)}`;
-
-  const url2 = `libs/php/retrieveWeatherSummary.php?lat=${encodeURIComponent(
-    lat
-  )}&lon=${encodeURIComponent(lon)}`;
+export const retrieveOverview = (json) => {
+  hideElement("flag");
 
   try {
-    document.getElementById("weatherloader").classList.remove("fadeOut");
-    // showElement("weatherloader");
-    const response = await fetch(url, fetchGetOptions);
-    const response2 = await fetch(url2, fetchGetOptions);
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-    if (!response2.ok) {
-      throw new Error(`Response status: ${response2.status}`);
-    }
-    const json = await response.json();
-    const json2 = await response2.json();
-    // hideElement("weatherloader");
-    document.getElementById("weatherloader").classList.add("fadeOut");
+    showElement("flag");
+    const {
+      currencyCode,
+      population,
+      countryName,
+      capital,
+      countryCode,
+      areaInSqKm,
+      continentName,
+    } = json;
 
-    const date = json2.date;
-    const time_zone = "GMT " + json2.tz;
-    const units = json2.units;
-    const description = json.weather[0].description;
-    const temperature = json.main.temp + " °";
-    const feels_like = json.main.feels_like + " °";
-    const humidity = "% " + json.main.humidity;
-    const wind_direction = json.wind.deg + " °";
-    const wind_speed = json.wind.speed + " meter/sec";
-    const summary = json2.weather_overview;
+    let languages = json.languages;
+    setExchangeRate(currencyCode);
+
+    if (languages.includes(",")) {
+      languages = json.languages.substring(0, json.languages.indexOf(","));
+    }
+    const languageNames = new Intl.DisplayNames(["en"], {
+      type: "language",
+    });
+
+    const language = languageNames.of(languages);
 
     const elementsToUpdate = [
-      { id: "date", value: Date.parse(date).toString("ddd, dS MMM yy") },
-      { id: "time_zone", value: time_zone },
-      { id: "units", value: units },
-      { id: "description", value: description },
-      { id: "temperature", value: temperature },
-      { id: "feels_like", value: feels_like },
-      { id: "humidity", value: humidity },
-      { id: "wind_direction", value: wind_direction },
-      { id: "wind_speed", value: wind_speed },
-      { id: "summary", value: summary },
+      { id: "currencyCode", value: currencyCode },
+      {
+        id: "population",
+        value: parseInt(population).toLocaleString(),
+      },
+      { id: "countryName", value: countryName },
+      { id: "capital", value: capital },
+      { id: "countryCode", value: countryCode },
+      {
+        id: "areaInSqKm",
+        value: parseFloat(areaInSqKm).toLocaleString() + " km²",
+      },
+      { id: "language", value: language },
+      { id: "continentName", value: continentName },
     ];
 
     updateElements(elementsToUpdate);
-
-    return json;
+    setContinentClass(continentName);
+    document.getElementById("overviewLoader").classList.add("fadeOut");
   } catch (error) {
     console.log(error.message);
   }
 };
 
-export const retrieveCities = async (iso2, siso2, element, cityname) => {
-  //last parameter is optional, for when the geodata is retrieved for the first time
-  // showElement("weatherloader");
-  document.getElementById("weatherloader").classList.remove("fadeOut");
-  element.classList.add("btn-disable");
+export const retrieveWeather = (json) => {
   try {
-    const response = await fetch(
-      `libs/php/retrieveCities.php?iso2=${encodeURIComponent(
-        iso2
-      )}&siso2=${encodeURIComponent(siso2)}`,
-      fetchGetOptions
-    );
-    const cities = await response.json();
-    element.classList.remove("btn-disable");
-    if (cities.length === 0) {
-      console.log("no city available");
-      element.replaceChildren();
-      element.innerHTML = `<option value="">No City Available</option>`;
-      element.classList.add("btn-disable");
-      document.getElementById("weatherloader").classList.add("fadeOut");
-      return {
-        iso2: iso2,
-        siso2: siso2,
-      };
-      // retrieveStateGeoLocation(iso2, siso2);
-    } else {
-      cities.forEach((city) => {
-        document.getElementById("weatherloader").classList.add("fadeOut");
-        // hideElement("weatherloader");
-        const option = document.createElement("option");
-        option.value = `${city.latitude}, ${city.longitude}, ${city.name}`;
-        option.textContent = city.name;
-        if (city.name == cityname) {
-          option.selected = true;
-        }
-        element.appendChild(option);
-      });
-    }
+    const date = formatDate(json.location.localtime);
+    const description = json.current.condition.text;
+    const todayIcon = json.current.condition.icon;
+    const temperature = json.current.temp_c;
+    const todayMinTemp = json.forecast.forecastday[0].day.mintemp_c;
+    const todayMaxTemp = json.forecast.forecastday[0].day.maxtemp_c;
+    const capital =
+      "Weather Forecast For " +
+      json.location.name +
+      ", " +
+      json.location.country;
+    const day1Date = formatDate(json.forecast.forecastday[1].date);
+    const day2Date = formatDate(json.forecast.forecastday[2].date);
+    const day1MaxTemp = json.forecast.forecastday[1].day.maxtemp_c;
+    const day2MaxTemp = json.forecast.forecastday[2].day.maxtemp_c;
+    const day1MinTemp = json.forecast.forecastday[1].day.mintemp_c;
+    const day2MinTemp = json.forecast.forecastday[2].day.mintemp_c;
+    const day1Icon = json.forecast.forecastday[1].day.condition.icon;
+    const day2Icon = json.forecast.forecastday[2].day.condition.icon;
+    const day1AvgTemp = json.forecast.forecastday[1].day.avgtemp_c;
+    const day2AvgTemp = json.forecast.forecastday[2].day.avgtemp_c;
+
+    const elementsToUpdate = [
+      {
+        id: "todaysDate",
+        value: Date.parse(date).toString("HH:mm ddd, dS MMM"),
+      },
+      {
+        id: "day1Date",
+        value: Date.parse(day1Date).toString("ddd, dS MMM"),
+      },
+      {
+        id: "day2Date",
+        value: Date.parse(day2Date).toString("ddd, dS MMM"),
+      },
+      { id: "todayConditions", value: description },
+      { id: "todayMinTemp", value: todayMinTemp },
+      { id: "todayMaxTemp", value: todayMaxTemp },
+      { id: "day1MaxTemp", value: day1MaxTemp },
+      { id: "day2MaxTemp", value: day2MaxTemp },
+      { id: "day1MinTemp", value: day1MinTemp },
+      { id: "day2MinTemp", value: day2MinTemp },
+      { id: "day1AvgTemp", value: day1AvgTemp },
+      { id: "day2AvgTemp", value: day2AvgTemp },
+      { id: "temperature", value: temperature },
+      { id: "weatherModalLabel", value: capital },
+    ];
+
+    const iconsToUpdate = [
+      { id: "todayIcon", value: todayIcon },
+      { id: "day1Icon", value: day1Icon },
+      { id: "day2Icon", value: day2Icon },
+    ];
+
+    updateElements(elementsToUpdate);
+    updateIcons(iconsToUpdate);
+
+    document.getElementById("weatherloader").classList.add("fadeOut");
   } catch (error) {
-    console.error(error.message);
+    console.log(error.message);
   }
 };
 
 export const retrieveWiki = async (country) => {
-  // hideElement("wikiLink");
-  // hideElement("wikiImage");
-  // showElement("wikiLoader");
-
   const url = `libs/php/wikipediaSearch.php?country=${encodeURIComponent(
     country
   )}`;
@@ -233,9 +266,6 @@ export const retrieveWiki = async (country) => {
     }
 
     const json = await response.json();
-    // showElement("wikiLink");
-    // showElement("wikiImage");
-    // hideElement("wikiLoader");
     const detailsArray = json;
     const selectedDetail = detailsArray.filter((detail) => {
       return detail.title === country;
@@ -265,259 +295,57 @@ export const retrieveWiki = async (country) => {
   }
 };
 
-export const retrieveNews = async (country) => {
-  // showElement("newsLoader");
-  document.getElementById("newsLoader").classList.remove("fadeOut");
-  const url = `libs/php/retrieveNews.php?country=${encodeURIComponent(
-    country
-  )}`;
+export async function retrieveCountryCode(latitude, longitude) {
+  const url = `libs/php/retrieveCountryCode.php?lat=${encodeURIComponent(
+    latitude
+  )}&lng=${encodeURIComponent(longitude)}`;
+
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(url, fetchGetOptions);
+    const json = await response.json();
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
-    console.log(response);
-    const articles = await response.json();
-    console.log(articles);
-    // hideElement("newsLoader");
-    const newsList = document.getElementById("newsList");
-
-    if (newsList.children.length === 0) {
-      // Create a table header
-      const headerRow = document.createElement("tr");
-      headerRow.innerHTML = `
-            <th>Title</th>
-            <th>Author</th>
-            <th>Date</th>
-        `;
-      newsList.appendChild(headerRow);
-    }
-
-    // Populate the table with news articles
-    articles.forEach((article) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-          <td class="text-left"><a href="${article.url}" target="_blank">${
-        article.title
-      }</a></td>
-          <td>${article.author || "Unknown"}</td>
-          <td>${Date.parse(article.publishedAt).toString("ddd, dS MMM yy")}</td>
-      `;
-      newsList.appendChild(tr);
-    });
-    document.getElementById("newsLoader").classList.add("fadeOut");
+    return {
+      countryCode: json.countryCode,
+    };
   } catch (error) {
     console.log(error.message);
-  }
-};
-
-export const retrieveCovidStats = async (country) => {
-  // showElement("covidLoader");
-  document.getElementById("covidLoader").classList.remove("fadeOut");
-  const covidList = document.getElementById("covidList");
-  covidList.innerHTML = "";
-
-  const url = `libs/php/retrieveCovidStats.php?country=${encodeURIComponent(
-    country
-  )}`;
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const stats = await response.json();
-    // hideElement("covidLoader");
-
-    for (let i = 0; i < Object.keys(stats).length; i++) {
-      if (
-        Object.keys(stats)[i] !== "country" &&
-        Object.keys(stats)[i] !== "countryInfo"
-      ) {
-        if (Object.keys(stats)[i] === "updated") {
-          var milliseconds = stats[Object.keys(stats)[i]];
-          var date = new Date(milliseconds);
-          console.log(Date.parse(date).toString("ddd, dS MMM yy"));
-          stats[Object.keys(stats)[i]] = Date.parse(date).toString(
-            "ddd, dS MMM yy, HH:mm:ss tt"
-          );
-        }
-        const tr = document.createElement("tr");
-        const td = camelToFlat(initialToUpperCase(Object.keys(stats)[i]));
-
-        tr.innerHTML = `
-          <td>${td[0].toUpperCase() + td.slice(1)}</td>
-          <td>${
-            isNaN(stats[Object.keys(stats)[i]])
-              ? stats[Object.keys(stats)[i]]
-              : parseInt(stats[Object.keys(stats)[i]]).toLocaleString()
-          }</td>
-
-      `;
-        covidList.appendChild(tr);
-      }
-    }
-    document.getElementById("covidLoader").classList.add("fadeOut");
-  } catch (error) {
-    console.log(error.message);
-  }
-};
-
-export async function retrieveStates(countryId, currentStateName, ciso2) {
-  //last parameter is optional, for when the geodata is retrieved for the first time
-  // showElement("weatherloader");
-  document.getElementById("weatherloader").classList.remove("fadeOut");
-  stateSelect.classList.add("btn-disable");
-
-  try {
-    const response = await fetch(
-      `libs/php/children.php?geonameId=${encodeURIComponent(countryId)}`,
-      fetchGetOptions
-    );
-    const states = await response.json();
-    // hideElement("weatherloader");
-    document.getElementById("weatherloader").classList.add("fadeOut");
-    stateSelect.classList.remove("btn-disable");
-
-    const selectedState = states.filter((state) => {
-      return state.adminCode1 === ciso2;
-    });
-
-    if (selectedState.length !== 0) {
-      currentStateName = selectedState[0].adminName1;
-    }
-
-    let statesArray = []; // creating a state names array to be sorted alphabetically
-    let statesObject = {}; // creating an object to match state names and state codes
-
-    states.forEach((state) => {
-      statesArray.push(state.adminName1);
-      statesObject[state.adminName1] =
-        state.adminCode1 + ", " + state.lat + ", " + state.lng;
-    });
-    statesArray.sort();
-    statesArray.forEach((state) => {
-      const option = document.createElement("option");
-      option.value = `${statesObject[state]}`;
-      option.textContent = state;
-      if (state === currentStateName) {
-        option.selected = true;
-      }
-      stateSelect.appendChild(option);
-    });
-
-    return statesObject; // Ensure this is returned
-  } catch (error) {
-    console.log("error", error);
-    // hideElement("weatherloader");
-    document.getElementById("weatherloader").classList.add("fadeOut");
-    stateSelect.classList.remove("btn-disable");
-    return {}; // Return an empty object in case of error
   }
 }
 
-export const retrieveOverview = async (countryCode) => {
-  // showElement("overviewLoader");
-  document.getElementById("overviewLoader").classList.remove("fadeOut");
-  hideElement("flag");
-
-  const url = `libs/php/retrieveOverview.php?country=${encodeURIComponent(
-    countryCode
-  )}`;
+export async function getLocationCoordinates(countryCode) {
   try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `libs/php/retrieveCountryBorders.php?countryCode=${encodeURIComponent(
+        countryCode
+      )}`
+    );
     if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const json = await response.json();
-    // hideElement("overviewLoader");
-    document.getElementById("overviewLoader").classList.add("fadeOut");
-    showElement("flag");
 
-    const {
-      currencyCode,
-      population,
-      countryName,
-      capital,
-      countryCode,
-      areaInSqKm,
-      continentName,
-    } = json;
-
-    let languages = json.languages;
-    setExchangeRate(currencyCode);
-
-    if (languages.includes(",")) {
-      languages = json.languages.substring(0, json.languages.indexOf(","));
-    }
-    const languageNames = new Intl.DisplayNames(["en"], {
-      type: "language",
-    });
-
-    const language = languageNames.of(languages);
-    // .substring(0, languageNames.of(lang).indexOf(" "));
-
-    const elementsToUpdate = [
-      { id: "currencyCode", value: currencyCode },
-      {
-        id: "population",
-        value: parseInt(population).toLocaleString(),
-      },
-      { id: "countryName", value: countryName },
-      { id: "capital", value: capital },
-      { id: "countryCode", value: countryCode },
-      {
-        id: "areaInSqKm",
-        value: parseFloat(areaInSqKm).toLocaleString() + " km²",
-      },
-      { id: "language", value: language },
-      { id: "continentName", value: continentName },
-    ];
-
-    updateElements(elementsToUpdate);
-    setContinentClass(continentName);
-
-    return json;
+    const data = await response.json();
+    return data.data;
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
   }
-};
+}
 
-export const countryCodeToGeonameId = async (countryCode) => {
-  const url = `libs/php/retrieveOverview.php?country=${encodeURIComponent(
-    countryCode
-  )}`;
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+export const setExchangeRate = (currency) => {
+  fetch(`libs/php/retrieveExchangeRate.php`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      document.getElementById("exchangeRate").innerText = `${(
+        1 / parseFloat(data.conversion_rates[currency])
+      ).toFixed(3)} $`;
+    })
+    .catch((error) => {
+      console.log(error);
     });
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-    const json = await response.json();
-    // console.log(json);
-    const { geonameId } = json;
-    return geonameId;
-    //return capital for later use
-  } catch (error) {
-    console.log(error.message);
-  }
 };
