@@ -21,6 +21,8 @@ import {
 
 import fetchMarkerData from "./utils/markers.js";
 
+let hasTouchScreen = false;
+let isOpen = false;
 let map;
 let latitude;
 let longitude;
@@ -212,6 +214,26 @@ const covidBtn = createModalButton(
 // initialise and add controls once DOM is ready
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // seeing if the user has a touchscreen device
+  if ("maxTouchPoints" in navigator) {
+    hasTouchScreen = navigator.maxTouchPoints > 0;
+  } else if ("msMaxTouchPoints" in navigator) {
+    hasTouchScreen = navigator.msMaxTouchPoints > 0;
+  } else {
+    var mQ = window.matchMedia && matchMedia("(pointer:coarse)");
+    if (mQ && mQ.media === "(pointer:coarse)") {
+      hasTouchScreen = !!mQ.matches;
+    } else if ("orientation" in window) {
+      hasTouchScreen = true; // deprecated, but good fallback
+    } else {
+      // Only as a last resort, fall back to user agent sniffing
+      var UA = navigator.userAgent;
+      hasTouchScreen =
+        /\b(BlackBerry|webOS|iPhone|IEMobile)\b/i.test(UA) ||
+        /\b(Android|Windows Phone|iPad|iPod)\b/i.test(UA);
+    }
+  }
+
   // showElement("mainLoader");
   try {
     const res = await getLocationPromise();
@@ -247,6 +269,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     retrieveWiki(selectedCountry);
   }
 
+  const leafletRight = document.querySelector("div.leaflet-right");
+
+  leafletRight.addEventListener("click", function () {
+    isOpen = true;
+  });
+
   map.on("click", async (e) => {
     document.getElementById("newsLoader").classList.remove("fadeOut");
     document.getElementById("covidLoader").classList.remove("fadeOut");
@@ -262,6 +290,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           "Clicked within the current country boundaries. Skipping data retrieval."
         );
         return; // Skip the data retrieval if within the same country
+      }
+
+      if (hasTouchScreen && isOpen) {
+        console.log("Leaflet controls open, closing it first");
+        isOpen = false;
+        return;
       }
       countryCode = data.countryCode;
     }
