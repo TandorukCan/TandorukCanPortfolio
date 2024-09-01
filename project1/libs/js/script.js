@@ -286,14 +286,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (data) {
       const clickedCountryCode = data.countryCode;
       if (clickedCountryCode === countryCode) {
-        console.log(
-          "Clicked within the current country boundaries. Skipping data retrieval."
-        );
+        // console.log(
+        //   "Clicked within the current country boundaries. Skipping data retrieval."
+        // );
         return; // Skip the data retrieval if within the same country
       }
 
       if (hasTouchScreen && isOpen) {
-        console.log("Leaflet controls open, closing it first");
+        // console.log("Leaflet controls open, closing it first");
         isOpen = false;
         return;
       }
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   infoScreen.addEventListener("click", () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
-      console.log("you clicked on the modal!"); // will be removed during production
+      // console.log("you clicked on the modal!"); // will be removed during production
     }
   });
 
@@ -319,7 +319,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
       modal.hide();
-      console.log("you clicked outside!"); // will be removed during production
+      // console.log("you clicked outside!"); // will be removed during production
     }
     isInfoModalHidden = false;
   });
@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   weatherScreen.addEventListener("click", () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
-      console.log("you clicked on the modal!"); // will be removed during production
+      // console.log("you clicked on the modal!"); // will be removed during production
     }
   });
 
@@ -339,7 +339,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
       modal.hide();
-      console.log("you clicked outside!"); // will be removed during production
+      // console.log("you clicked outside!"); // will be removed during production
     }
     isInfoModalHidden = false;
   });
@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   wikiScreen.addEventListener("click", () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
-      console.log("you clicked on the modal!"); // will be removed during production
+      // console.log("you clicked on the modal!"); // will be removed during production
     }
   });
 
@@ -357,7 +357,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
       modal.hide();
-      console.log("you clicked outside!"); // will be removed during production
+      // console.log("you clicked outside!"); // will be removed during production
     }
     isInfoModalHidden = false;
   });
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   newsScreen.addEventListener("click", () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
-      console.log("you clicked on the modal!"); // will be removed during production
+      // console.log("you clicked on the modal!"); // will be removed during production
     }
   });
 
@@ -375,7 +375,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
       modal.hide();
-      console.log("you clicked outside!"); // will be removed during production
+      // console.log("you clicked outside!"); // will be removed during production
     }
     isInfoModalHidden = false;
   });
@@ -386,7 +386,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   covidScreen.addEventListener("click", () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
-      console.log("you clicked on the modal!"); // will be removed during production
+      // console.log("you clicked on the modal!"); // will be removed during production
     }
   });
 
@@ -395,7 +395,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isInfoModalHidden = !isInfoModalHidden;
     if (isInfoModalHidden) {
       modal.hide();
-      console.log("you clicked outside!"); // will be removed during production
+      // console.log("you clicked outside!"); // will be removed during production
     }
     isInfoModalHidden = false;
   });
