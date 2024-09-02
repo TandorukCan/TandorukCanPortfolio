@@ -42,6 +42,10 @@ body {
   background-color: #ffffff;
 }
 
+.leaflet-container {
+  cursor: pointer;
+}
+
 /* #overviewLoader {
   display: none;
 } */

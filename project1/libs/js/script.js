@@ -4,9 +4,9 @@
 // GLOBAL DECLARATIONS
 // ---------------------------------------------------------
 
-import { resetAllFields } from "./utils/data-processing.js";
+// import { resetAllFields } from "./utils/data-processing.js";
 
-import { hideElement, showElement } from "./utils/utility.js";
+// import { hideElement, showElement } from "./utils/utility.js";
 
 import {
   retrieveFlag,
@@ -36,7 +36,29 @@ let countryCode;
 let modal; // will be removed if necessary
 let isInfoModalHidden = false;
 
-// Logic start here
+// Functions start here
+
+const closeWhenClickedOutsideModal = (modalName, modalNumber) => {
+  const screen = document.getElementsByClassName("modal-content shadow")[
+    modalNumber
+  ];
+  screen.addEventListener("click", () => {
+    isInfoModalHidden = !isInfoModalHidden;
+    if (isInfoModalHidden) {
+      // console.log("you clicked on the modal!"); // will be removed during production
+    }
+  });
+
+  const exampleModal = document.getElementById(modalName);
+  exampleModal.addEventListener("click", () => {
+    isInfoModalHidden = !isInfoModalHidden;
+    if (isInfoModalHidden) {
+      modal.hide();
+      // console.log("you clicked outside!"); // will be removed during production
+    }
+    isInfoModalHidden = false;
+  });
+};
 
 const setupInterface = async (countryCode, layerControl, map, fly) => {
   try {
@@ -196,7 +218,7 @@ const createModalButton = (iconClass, modalId) => {
   });
 };
 
-const infoBtn = createModalButton("fa-info fa-xl", "exampleModal");
+const infoBtn = createModalButton("fa-info fa-xl", "infoModal");
 const weatherBtn = createModalButton("fa-umbrella fa-xl", "weatherModal");
 const wikiBtn = createModalButton(
   "fa-brands fa-wikipedia-w fa-xl",
@@ -270,10 +292,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const leafletRight = document.querySelector("div.leaflet-right");
-
   leafletRight.addEventListener("click", function () {
     isOpen = true;
   });
+
+  closeWhenClickedOutsideModal("infoModal", 0);
+  closeWhenClickedOutsideModal("weatherModal", 1);
+  closeWhenClickedOutsideModal("wikiModal", 2);
+  closeWhenClickedOutsideModal("newsModal", 3);
+  closeWhenClickedOutsideModal("covidModal", 4);
 
   map.on("click", async (e) => {
     document.getElementById("newsLoader").classList.remove("fadeOut");
@@ -304,100 +331,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (selectedCountry) {
       retrieveWiki(selectedCountry);
     }
-  });
-
-  const infoScreen = document.getElementsByClassName("modal-content shadow")[0];
-  infoScreen.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      // console.log("you clicked on the modal!"); // will be removed during production
-    }
-  });
-
-  const exampleModal = document.getElementById("exampleModal");
-  exampleModal.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      modal.hide();
-      // console.log("you clicked outside!"); // will be removed during production
-    }
-    isInfoModalHidden = false;
-  });
-
-  const weatherScreen = document.getElementsByClassName(
-    "modal-content shadow"
-  )[1];
-  weatherScreen.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      // console.log("you clicked on the modal!"); // will be removed during production
-    }
-  });
-
-  const weatherModal = document.getElementById("weatherModal");
-  weatherModal.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      modal.hide();
-      // console.log("you clicked outside!"); // will be removed during production
-    }
-    isInfoModalHidden = false;
-  });
-
-  const wikiScreen = document.getElementsByClassName("modal-content shadow")[2];
-  wikiScreen.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      // console.log("you clicked on the modal!"); // will be removed during production
-    }
-  });
-
-  const wikiModal = document.getElementById("wikiModal");
-  wikiModal.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      modal.hide();
-      // console.log("you clicked outside!"); // will be removed during production
-    }
-    isInfoModalHidden = false;
-  });
-
-  const newsScreen = document.getElementsByClassName("modal-content shadow")[3];
-  newsScreen.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      // console.log("you clicked on the modal!"); // will be removed during production
-    }
-  });
-
-  const newsModal = document.getElementById("newsModal");
-  newsModal.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      modal.hide();
-      // console.log("you clicked outside!"); // will be removed during production
-    }
-    isInfoModalHidden = false;
-  });
-
-  const covidScreen = document.getElementsByClassName(
-    "modal-content shadow"
-  )[4];
-  covidScreen.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      // console.log("you clicked on the modal!"); // will be removed during production
-    }
-  });
-
-  const covidModal = document.getElementById("covidModal");
-  covidModal.addEventListener("click", () => {
-    isInfoModalHidden = !isInfoModalHidden;
-    if (isInfoModalHidden) {
-      modal.hide();
-      // console.log("you clicked outside!"); // will be removed during production
-    }
-    isInfoModalHidden = false;
   });
 
   countrySelect.addEventListener("change", async (e) => {
