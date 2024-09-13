@@ -9,13 +9,17 @@ $(document).ready(function () {
   $("#refreshBtn").click(function () {
     if ($("#personnelBtn").hasClass("active")) {
       // Refresh personnel table
-      console.log("it's active");
+      console.log("you are in personnel");
       loadPersonnelTable();
     } else {
       if ($("#departmentsBtn").hasClass("active")) {
+        console.log("you are in departments");
+        loadDepartmentsTable();
         // Refresh department table
       } else {
         // Refresh location table
+        console.log("you are in locations");
+        loadLocationsTable();
       }
     }
   });
@@ -34,15 +38,19 @@ $(document).ready(function () {
 
   $("#departmentsBtn").click(function () {
     // Call function to refresh department table
+    console.log("you clicked on departments tab");
+    loadDepartmentsTable();
   });
 
   $("#locationsBtn").click(function () {
     // Call function to refresh location table
+    console.log("you clicked on locations tab");
+    loadLocationsTable();
   });
 
   $("#editPersonnelModal").on("show.bs.modal", function (e) {
     $.ajax({
-      url: "https://coding.itcareerswitch.co.uk/companydirectory/libs/php/getPersonnelByID.php",
+      url: "./libs/php/getPersonnelByID.php",
       type: "POST",
       dataType: "json",
       data: {
@@ -58,6 +66,7 @@ $(document).ready(function () {
         if (resultCode == 200) {
           // Update the hidden input with the employee id so that
           // it can be referenced when the form is submitted
+          console.log(result);
 
           $("#editPersonnelEmployeeID").val(result.data.personnel[0].id);
 
@@ -136,7 +145,7 @@ function loadPersonnelTable() {
               class="btn btn-primary btn-sm"
               data-bs-toggle="modal"
               data-bs-target="#editPersonnelModal"
-              data-id="${index}"
+              data-id="${person.id}"
             >
               <i class="fa-solid fa-pencil fa-fw"></i>
             </button>
@@ -145,13 +154,136 @@ function loadPersonnelTable() {
               class="btn btn-primary btn-sm"
               data-bs-toggle="modal"
               data-bs-target="#deletePersonnelModal"
-              data-id="${index}"
+              data-id="${person.id}"
             >
               <i class="fa-solid fa-trash fa-fw"></i>
             </button>
           </td>
         </tr>
       `);
+        });
+
+        // $("#editPersonnelDepartment").val(
+        //   result.data.personnel[0].departmentID
+        // );
+      } else {
+        // $("#editPersonnelModal .modal-title").replaceWith(
+        //   "Error retrieving data"
+        // );
+        console.log("ERROR");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#editPersonnelModal .modal-title").replaceWith(
+        "Error retrieving data"
+      );
+    },
+  });
+}
+
+function loadDepartmentsTable() {
+  $.ajax({
+    url: "./libs/php/getAllDepartments.php",
+    type: "GET",
+    dataType: "json",
+    success: function (result) {
+      console.log(result);
+      var resultCode = result.status.code;
+
+      if (resultCode == 200) {
+        // Update the hidden input with the employee id so that
+        // it can be referenced when the form is submitted
+        // console.log(result.data[0]);
+
+        // Clear any existing rows in the table body
+        $("#departmentTableBody").empty();
+
+        $.each(result.data, function (index, department) {
+          $("#departmentTableBody").append(`
+            <tr>
+            <td class="align-middle text-nowrap">${department.name}</td>
+            <td class="align-middle text-nowrap d-md-table-cell">${department.locationID}</td>
+            <td class="align-middle text-end text-nowrap">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#editDepartmentModal"
+                data-id="${department.id}"
+              >
+                <i class="fa-solid fa-pencil fa-fw"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm deleteDepartmentBtn"
+                data-id="${department.id}"
+              >
+                <i class="fa-solid fa-trash fa-fw"></i>
+              </button>
+            </td>
+          </tr>
+        `);
+        });
+
+        // $("#editPersonnelDepartment").val(
+        //   result.data.personnel[0].departmentID
+        // );
+      } else {
+        // $("#editPersonnelModal .modal-title").replaceWith(
+        //   "Error retrieving data"
+        // );
+        console.log("ERROR");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#editPersonnelModal .modal-title").replaceWith(
+        "Error retrieving data"
+      );
+    },
+  });
+}
+
+function loadLocationsTable() {
+  $.ajax({
+    url: "./libs/php/getAllLocations.php",
+    type: "GET",
+    dataType: "json",
+    success: function (result) {
+      console.log(result);
+      var resultCode = result.status.code;
+
+      if (resultCode == 200) {
+        // Update the hidden input with the employee id so that
+        // it can be referenced when the form is submitted
+        // console.log(result.data[0]);
+
+        // Clear any existing rows in the table body
+        $("#locationTableBody").empty();
+
+        $.each(result.data, function (index, location) {
+          $("#locationTableBody").append(`
+            <tr>
+            <td class="align-middle text-nowrap">${location.name}</td>
+            <td class="align-middle text-end text-nowrap">
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#editDepartmentModal"
+                data-id="${location.id}"
+              >
+                <i class="fa-solid fa-pencil fa-fw"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm deleteDepartmentBtn"
+                data-id="${location.id}"
+              >
+                <i class="fa-solid fa-trash fa-fw"></i>
+              </button>
+            </td>
+          </tr>
+        `);
         });
 
         // $("#editPersonnelDepartment").val(
