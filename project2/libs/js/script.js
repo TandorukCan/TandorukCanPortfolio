@@ -115,6 +115,95 @@ $(document).ready(function () {
   });
 });
 
+$("#editDepartmentModal").on("show.bs.modal", function (e) {
+  $.ajax({
+    url: "./libs/php/getDepartmentByID.php",
+    type: "POST",
+    dataType: "json",
+    data: {
+      // Retrieve the data-id attribute from the calling button
+      // see https://getbootstrap.com/docs/5.0/components/modal/#varying-modal-content
+      // for the non-jQuery JavaScript alternative
+      id: $(e.relatedTarget).attr("data-id"),
+    },
+    success: function (result) {
+      console.log($(e.relatedTarget).attr("data-id"));
+      var resultCode = result.status.code;
+
+      if (resultCode == 200) {
+        // Update the hidden input with the employee id so that
+        // it can be referenced when the form is submitted
+        console.log(result);
+
+        $("#editDepartmentID").val(result.data[0].id);
+
+        $("#editDepartmentName").val(result.data[0].name);
+        $("#editLocationId").val(result.data[0].locationName);
+
+        // to be edited accordingly
+
+        // $("#editPersonnelDepartment").html("");
+
+        // $.each(result.data.department, function () {
+        //   $("#editPersonnelDepartment").append(
+        //     $("<option>", {
+        //       value: this.id,
+        //       text: this.name,
+        //     })
+        //   );
+        // });
+
+        // $("#editPersonnelDepartment").val(
+        //   result.data.personnel[0].departmentID
+        // );
+      } else {
+        $("#editDepartmentModal .modal-title").replaceWith(
+          "Error retrieving data"
+        );
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#editDepartmentModal .modal-title").replaceWith(
+        "Error retrieving data"
+      );
+    },
+  });
+});
+
+$("#editLocationModal").on("show.bs.modal", function (e) {
+  $.ajax({
+    url: "./libs/php/getLocationByID.php",
+    type: "POST",
+    dataType: "json",
+    data: {
+      // Retrieve the data-id attribute from the calling button
+      // see https://getbootstrap.com/docs/5.0/components/modal/#varying-modal-content
+      // for the non-jQuery JavaScript alternative
+      id: $(e.relatedTarget).attr("data-id"),
+    },
+    success: function (result) {
+      console.log($(e.relatedTarget).attr("data-id"));
+      var resultCode = result.status.code;
+
+      if (resultCode == 200) {
+        // Update the hidden input with the employee id so that
+        // it can be referenced when the form is submitted
+        console.log(result);
+
+        $("#editLocationID").val(result.data[0].id);
+        $("#editLocationName").val(result.data[0].name);
+      } else {
+        $("#editLocationModal .modal-title").replaceWith(
+          "Error retrieving data"
+        );
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#editLocationModal .modal-title").replaceWith("Error retrieving data");
+    },
+  });
+});
+
 function loadPersonnelTable() {
   $.ajax({
     url: "./libs/php/getAll.php",
@@ -202,7 +291,7 @@ function loadDepartmentsTable() {
           $("#departmentTableBody").append(`
             <tr>
             <td class="align-middle text-nowrap">${department.name}</td>
-            <td class="align-middle text-nowrap d-md-table-cell">${department.locationID}</td>
+            <td class="align-middle text-nowrap d-md-table-cell">${department.locationName}</td>
             <td class="align-middle text-end text-nowrap">
               <button
                 type="button"
@@ -269,7 +358,7 @@ function loadLocationsTable() {
                 type="button"
                 class="btn btn-primary btn-sm"
                 data-bs-toggle="modal"
-                data-bs-target="#editDepartmentModal"
+                data-bs-target="#editLocationModal"
                 data-id="${location.id}"
               >
                 <i class="fa-solid fa-pencil fa-fw"></i>
