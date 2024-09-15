@@ -28,7 +28,13 @@
               <button id="filterBtn" type="button" class="btn btn-primary">
                 <i class="fa-solid fa-filter fa-fw"></i>
               </button>
-              <button id="addBtn" type="button" class="btn btn-primary">
+              <button
+                id="addBtn"
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#editPersonnelModal"
+              >
                 <i class="fa-solid fa-plus fa-fw"></i>
               </button>
             </div>
@@ -241,7 +247,7 @@
       >
         <div class="modal-content shadow">
           <div class="modal-header bg-primary bg-gradient text-white">
-            <h5 class="modal-title">Edit employee</h5>
+            <h5 id="personnelTitle" class="modal-title"></h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -346,7 +352,7 @@
       >
         <div class="modal-content shadow">
           <div class="modal-header bg-primary bg-gradient text-white">
-            <h5 class="modal-title">Edit department</h5>
+            <h5 id="departmentTitle" class="modal-title"></h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -420,7 +426,7 @@
       >
         <div class="modal-content shadow">
           <div class="modal-header bg-primary bg-gradient text-white">
-            <h5 class="modal-title">Edit location</h5>
+            <h5 id="locationTitle" class="modal-title"></h5>
             <button
               type="button"
               class="btn-close btn-close-white"
