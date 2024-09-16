@@ -306,6 +306,75 @@ $(document).ready(function () {
       //above code will me commented in once insertDepartment.php is checked and made sure to be working
     }
   });
+
+  $("#editLocationForm").on("submit", function (e) {
+    // Executes when the form button with type="submit" is clicked
+    // stop the default browser behviour
+    e.preventDefault();
+
+    // Gather form data into an object
+
+    if ($("#editLocationID").val()) {
+      var formData = {
+        id: $("#editLocationID").val(),
+        name: $("#editLocationName").val(),
+      };
+      // AJAX call to save form data
+      $.ajax({
+        url: "./libs/php/updateLocation.php",
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Success message or logic (e.g., closing the modal and refreshing the personnel list)
+            $("#editLocationModal").modal("hide");
+            alert("Location information updated successfully.");
+            // Optionally refresh the table data
+            loadLocationsTable();
+          } else {
+            // Handle error response
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // Handle AJAX error
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+      console.log("editing location data");
+      //above code will me commented in once updateDepartment.php is created
+    } else {
+      var formData = {
+        name: $("#editLocationName").val(),
+      };
+
+      $.ajax({
+        url: "./libs/php/insertLocation.php",
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Success message or logic (e.g., closing the modal and refreshing the personnel list)
+            $("#editLocationModal").modal("hide");
+            alert("Location information added successfully.");
+            // Optionally refresh the table data
+            loadLocationsTable();
+          } else {
+            // Handle error response
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // Handle AJAX error
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+      console.log("inserted location data");
+      //above code will me commented in once insertDepartment.php is checked and made sure to be working
+    }
+  });
 });
 
 $("#editDepartmentModal").on("show.bs.modal", function (e) {
