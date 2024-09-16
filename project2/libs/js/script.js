@@ -210,64 +210,64 @@ $(document).ready(function () {
     // Gather form data into an object
 
     if ($("#editDepartmentID").val()) {
-      // var formData = {
-      //   id: $("#editDepartmentID").val(),
-      //   name: $("#editDepartmentName").val(),
-      //   locationID: $("#editLocation").val(),
-      // };
-      // // AJAX call to save form data
-      // $.ajax({
-      //   url: "./libs/php/updateDepartment.php",
-      //   type: "POST",
-      //   dataType: "json",
-      //   data: formData,
-      //   success: function (response) {
-      //     if (response.status.code == 200) {
-      //       // Success message or logic (e.g., closing the modal and refreshing the personnel list)
-      //       alert("Personnel information added successfully.");
-      //       $("#editDepartmentForm").modal("hide");
-      //       // Optionally refresh the table data
-      //       loadPersonnelTable();
-      //     } else {
-      //       // Handle error response
-      //       alert("Error: " + response.status.message);
-      //     }
-      //   },
-      //   error: function (jqXHR, textStatus, errorThrown) {
-      //     // Handle AJAX error
-      //     alert("AJAX error: " + textStatus + " - " + errorThrown);
-      //   },
-      // });
+      var formData = {
+        id: $("#editDepartmentID").val(),
+        name: $("#editDepartmentName").val(),
+        locationID: $("#editLocation").val(),
+      };
+      // AJAX call to save form data
+      $.ajax({
+        url: "./libs/php/updateDepartment.php",
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Success message or logic (e.g., closing the modal and refreshing the personnel list)
+            $("#editDepartmentModal").modal("hide");
+            alert("Department information updated successfully.");
+            // Optionally refresh the table data
+            loadDepartmentsTable();
+          } else {
+            // Handle error response
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // Handle AJAX error
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
       console.log("pretending to edit department data");
       //above code will me commented in once updateDepartment.php is created
     } else {
-      // var formData = {
-      //   name: $("#editDepartmentName").val(),
-      //   locationID: $("#editLocation").val(),
-      // };
+      var formData = {
+        name: $("#editDepartmentName").val(),
+        locationID: $("#editLocation").val(),
+      };
 
-      // $.ajax({
-      //   url: "./libs/php/insertDepartment.php",
-      //   type: "POST",
-      //   dataType: "json",
-      //   data: formData,
-      //   success: function (response) {
-      //     if (response.status.code == 200) {
-      //       // Success message or logic (e.g., closing the modal and refreshing the personnel list)
-      //       alert("Personnel information added successfully.");
-      //       $("#editDepartmentForm").modal("hide");
-      //       // Optionally refresh the table data
-      //       loadPersonnelTable();
-      //     } else {
-      //       // Handle error response
-      //       alert("Error: " + response.status.message);
-      //     }
-      //   },
-      //   error: function (jqXHR, textStatus, errorThrown) {
-      //     // Handle AJAX error
-      //     alert("AJAX error: " + textStatus + " - " + errorThrown);
-      //   },
-      // });
+      $.ajax({
+        url: "./libs/php/insertDepartment.php",
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Success message or logic (e.g., closing the modal and refreshing the personnel list)
+            $("#editDepartmentModal").modal("hide");
+            alert("Department information added successfully.");
+            // Optionally refresh the table data
+            loadDepartmentsTable();
+          } else {
+            // Handle error response
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // Handle AJAX error
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
       console.log("pretending to insert department data");
       //above code will me commented in once insertDepartment.php is checked and made sure to be working
     }
