@@ -111,14 +111,12 @@ $(document).ready(function () {
               result.data.personnel[0].departmentID
             );
           } else {
-            $("#editPersonnelModal .modal-title").replaceWith(
-              "Error retrieving data"
-            );
+            $("#editPersonnelModal .modal-title").text("Error retrieving data");
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-          $("#editPersonnelModal .modal-title").replaceWith(
-            "Error retrieving data"
+          $("#editPersonnelModal .modal-title").text(
+            `Error retrieving data: ${errorThrown}`
           );
         },
       });
@@ -129,8 +127,35 @@ $(document).ready(function () {
       $("#editPersonnelLastName").val("");
       $("#editPersonnelJobTitle").val("");
       $("#editPersonnelEmailAddress").val("");
-      // $("#editPersonnelDepartment").html("");
+      $("#editPersonnelDepartment").html("");
       // will do an ajax request to retrieve all departments
+      $.ajax({
+        url: "./libs/php/getAllDepartments.php",
+        type: "GET",
+        dataType: "json",
+        success: function (result) {
+          console.log(result);
+          var resultCode = result.status.code;
+
+          if (resultCode == 200) {
+            $.each(result.data, function () {
+              $("#editPersonnelDepartment").append(
+                $("<option>", {
+                  value: this.id,
+                  text: this.name,
+                })
+              );
+            });
+          } else {
+            $("#editPersonnelModal .modal-title").text("Error retrieving data");
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          $("#editPersonnelModal .modal-title").text(
+            `Error retrieving data: ${errorThrown}`
+          );
+        },
+      });
     }
   });
 
@@ -188,7 +213,7 @@ $(document).ready(function () {
       // var formData = {
       //   id: $("#editDepartmentID").val(),
       //   name: $("#editDepartmentName").val(),
-      //   locationID: $("#editLocationId").val(),
+      //   locationID: $("#editLocation").val(),
       // };
       // // AJAX call to save form data
       // $.ajax({
@@ -218,7 +243,7 @@ $(document).ready(function () {
     } else {
       // var formData = {
       //   name: $("#editDepartmentName").val(),
-      //   locationID: $("#editLocationId").val(),
+      //   locationID: $("#editLocation").val(),
       // };
 
       // $.ajax({
@@ -250,6 +275,35 @@ $(document).ready(function () {
 });
 
 $("#editDepartmentModal").on("show.bs.modal", function (e) {
+  // getAllLocations.php is called to populate location select
+  $.ajax({
+    url: "./libs/php/getAllLocations.php",
+    type: "GET",
+    dataType: "json",
+    success: function (result2) {
+      var resultCode = result2.status.code;
+
+      if (resultCode == 200) {
+        $("#editLocation").html("");
+        $.each(result2.data, function () {
+          $("#editLocation").append(
+            $("<option>", {
+              value: this.id,
+              text: this.name,
+            })
+          );
+        });
+      } else {
+        $("#editDepartmentModal .modal-title").text("Error retrieving data");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#editDepartmentModal .modal-title").text(
+        `Error retrieving data: ${errorThrown}`
+      );
+    },
+  });
+
   if ($(e.relatedTarget).attr("data-id")) {
     $("#departmentTitle").text("Edit department");
     $.ajax({
@@ -257,59 +311,31 @@ $("#editDepartmentModal").on("show.bs.modal", function (e) {
       type: "POST",
       dataType: "json",
       data: {
-        // Retrieve the data-id attribute from the calling button
-        // see https://getbootstrap.com/docs/5.0/components/modal/#varying-modal-content
-        // for the non-jQuery JavaScript alternative
         id: $(e.relatedTarget).attr("data-id"),
       },
       success: function (result) {
-        console.log($(e.relatedTarget).attr("data-id"));
         var resultCode = result.status.code;
 
         if (resultCode == 200) {
           // Update the hidden input with the employee id so that
           // it can be referenced when the form is submitted
-          console.log(result);
-
           $("#editDepartmentID").val(result.data[0].id);
           $("#editDepartmentName").val(result.data[0].name);
-          $("#editLocationId").val(result.data[0].locationName);
-
-          // to be edited accordingly
-
-          // $("#editPersonnelDepartment").html("");
-
-          // $.each(result.data.department, function () {
-          //   $("#editPersonnelDepartment").append(
-          //     $("<option>", {
-          //       value: this.id,
-          //       text: this.name,
-          //     })
-          //   );
-          // });
-
-          // $("#editPersonnelDepartment").val(
-          //   result.data.personnel[0].departmentID
-          // );
+          $("#editLocation").val(result.data[0].locationID);
         } else {
-          $("#editDepartmentModal .modal-title").replaceWith(
-            "Error retrieving data"
-          );
+          $("#editDepartmentModal .modal-title").text("Error retrieving data");
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        $("#editDepartmentModal .modal-title").replaceWith(
-          "Error retrieving data"
+        $("#editDepartmentModal .modal-title").text(
+          `Error retrieving data: ${errorThrown}`
         );
       },
     });
   } else {
     $("#departmentTitle").text("Add department");
-    $("#editDepartmentName").val("");
-    $("#editLocationId").val("");
     $("#editDepartmentID").val("");
-
-    console.log("i'm in adding mode");
+    $("#editDepartmentName").val("");
   }
 });
 
@@ -338,14 +364,12 @@ $("#editLocationModal").on("show.bs.modal", function (e) {
           $("#editLocationID").val(result.data[0].id);
           $("#editLocationName").val(result.data[0].name);
         } else {
-          $("#editLocationModal .modal-title").replaceWith(
-            "Error retrieving data"
-          );
+          $("#editLocationModal .modal-title").text("Error retrieving data");
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        $("#editLocationModal .modal-title").replaceWith(
-          "Error retrieving data"
+        $("#editDepartmentModal .modal-title").text(
+          `Error retrieving data: ${errorThrown}`
         );
       },
     });
@@ -370,7 +394,6 @@ function loadPersonnelTable() {
       if (resultCode == 200) {
         // Update the hidden input with the employee id so that
         // it can be referenced when the form is submitted
-        // console.log(result.data[0]);
 
         // Clear any existing rows in the table body
         $("#personnelTableBody").empty();
@@ -405,20 +428,13 @@ function loadPersonnelTable() {
         </tr>
       `);
         });
-
-        // $("#editPersonnelDepartment").val(
-        //   result.data.personnel[0].departmentID
-        // );
       } else {
-        // $("#editPersonnelModal .modal-title").replaceWith(
-        //   "Error retrieving data"
-        // );
         console.log("ERROR");
       }
     },
     error: function (jqXHR, textStatus, errorThrown) {
-      $("#editPersonnelModal .modal-title").replaceWith(
-        "Error retrieving data"
+      $("#editPersonnelModal .modal-title").text(
+        `Error retrieving data: ${errorThrown}`
       );
     },
   });
@@ -436,7 +452,6 @@ function loadDepartmentsTable() {
       if (resultCode == 200) {
         // Update the hidden input with the employee id so that
         // it can be referenced when the form is submitted
-        // console.log(result.data[0]);
 
         // Clear any existing rows in the table body
         $("#departmentTableBody").empty();
@@ -467,20 +482,14 @@ function loadDepartmentsTable() {
           </tr>
         `);
         });
-
-        // $("#editPersonnelDepartment").val(
-        //   result.data.personnel[0].departmentID
-        // );
       } else {
-        // $("#editPersonnelModal .modal-title").replaceWith(
-        //   "Error retrieving data"
-        // );
         console.log("ERROR");
       }
     },
     error: function (jqXHR, textStatus, errorThrown) {
-      $("#editPersonnelModal .modal-title").replaceWith(
-        "Error retrieving data"
+      //an error modal will be created in the future and the next two lines will be replaced with a code to make the modal appear
+      $("#editDepartmentModal .modal-title").text(
+        `Error retrieving data: ${errorThrown}`
       );
     },
   });
@@ -498,7 +507,6 @@ function loadLocationsTable() {
       if (resultCode == 200) {
         // Update the hidden input with the employee id so that
         // it can be referenced when the form is submitted
-        // console.log(result.data[0]);
 
         // Clear any existing rows in the table body
         $("#locationTableBody").empty();
@@ -528,20 +536,14 @@ function loadLocationsTable() {
           </tr>
         `);
         });
-
-        // $("#editPersonnelDepartment").val(
-        //   result.data.personnel[0].departmentID
-        // );
       } else {
-        // $("#editPersonnelModal .modal-title").replaceWith(
-        //   "Error retrieving data"
-        // );
         console.log("ERROR");
       }
     },
     error: function (jqXHR, textStatus, errorThrown) {
-      $("#editPersonnelModal .modal-title").replaceWith(
-        "Error retrieving data"
+      //an error modal will be created in the future and the next two lines will be replaced with a code to make the modal appear
+      $("#editLocationModal .modal-title").text(
+        `Error retrieving data: ${errorThrown}`
       );
     },
   });
