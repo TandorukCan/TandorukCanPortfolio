@@ -167,39 +167,73 @@ $(document).ready(function () {
     e.preventDefault();
 
     // Gather form data into an object
-    var formData = {
-      id: $("#editPersonnelEmployeeID").val(),
-      firstName: $("#editPersonnelFirstName").val(),
-      lastName: $("#editPersonnelLastName").val(),
-      jobTitle: $("#editPersonnelJobTitle").val(),
-      email: $("#editPersonnelEmailAddress").val(),
-      departmentID: $("#editPersonnelDepartment").val(),
-    };
+    if ($("#editPersonnelEmployeeID").val()) {
+      var formData = {
+        id: $("#editPersonnelEmployeeID").val(),
+        firstName: $("#editPersonnelFirstName").val(),
+        lastName: $("#editPersonnelLastName").val(),
+        jobTitle: $("#editPersonnelJobTitle").val(),
+        email: $("#editPersonnelEmailAddress").val(),
+        departmentID: $("#editPersonnelDepartment").val(),
+      };
 
-    // AJAX call to save form data
+      // AJAX call to save form data
 
-    $.ajax({
-      url: "./libs/php/updatePersonnel.php", // PHP file to handle updating
-      type: "POST",
-      dataType: "json",
-      data: formData,
-      success: function (response) {
-        if (response.status.code == 200) {
-          // Success message or logic (e.g., closing the modal and refreshing the personnel list)
-          alert("Personnel information updated successfully.");
-          $("#editPersonnelModal").modal("hide");
-          // Optionally refresh the table data
-          loadPersonnelTable();
-        } else {
-          // Handle error response
-          alert("Error: " + response.status.message);
-        }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        // Handle AJAX error
-        alert("AJAX error: " + textStatus + " - " + errorThrown);
-      },
-    });
+      $.ajax({
+        url: "./libs/php/updatePersonnel.php", // PHP file to handle updating
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Success message or logic (e.g., closing the modal and refreshing the personnel list)
+            alert("Personnel information updated successfully.");
+            $("#editPersonnelModal").modal("hide");
+            // Optionally refresh the table data
+            loadPersonnelTable();
+          } else {
+            // Handle error response
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // Handle AJAX error
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+    } else {
+      var formData = {
+        firstName: $("#editPersonnelFirstName").val(),
+        lastName: $("#editPersonnelLastName").val(),
+        jobTitle: $("#editPersonnelJobTitle").val(),
+        email: $("#editPersonnelEmailAddress").val(),
+        departmentID: $("#editPersonnelDepartment").val(),
+      };
+
+      $.ajax({
+        url: "./libs/php/insertPersonnel.php",
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Success message or logic (e.g., closing the modal and refreshing the personnel list)
+            $("#editPersonnelModal").modal("hide");
+            alert("Personnel information added successfully.");
+            // Optionally refresh the table data
+            loadPersonnelTable();
+          } else {
+            // Handle error response
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          // Handle AJAX error
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+      console.log("inserted personnel data");
+    }
   });
 
   $("#editDepartmentForm").on("submit", function (e) {
