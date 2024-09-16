@@ -375,6 +375,39 @@ $(document).ready(function () {
       //above code will me commented in once insertDepartment.php is checked and made sure to be working
     }
   });
+
+  $(document).on("click", "#deletePersonnelModal", function () {
+    // Confirm deletion
+    var confirmDelete = confirm(
+      "Are you sure you want to delete this personnel?"
+    );
+
+    if (confirmDelete) {
+      console.log("you clicked on delete personnel");
+      // Get the personnel ID from the data-id attribute
+      var personnelId = $(this).data("id");
+      console.log(personnelId);
+      // Proceed with AJAX call to delete personnel
+      $.ajax({
+        url: "./libs/php/deletePersonnel.php", // Replace with the correct PHP file
+        type: "POST",
+        dataType: "json",
+        data: { id: personnelId }, // Send personnel ID to be deleted
+        success: function (response) {
+          if (response.status.code == 200) {
+            alert("Personnel deleted successfully.");
+            // Optionally refresh personnel list or update the UI
+            loadPersonnelTable();
+          } else {
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+    }
+  });
 });
 
 $("#editDepartmentModal").on("show.bs.modal", function (e) {
@@ -521,8 +554,7 @@ function loadPersonnelTable() {
             <button
               type="button"
               class="btn btn-primary btn-sm"
-              data-bs-toggle="modal"
-              data-bs-target="#deletePersonnelModal"
+              id="deletePersonnelModal"
               data-id="${person.id}"
             >
               <i class="fa-solid fa-trash fa-fw"></i>
