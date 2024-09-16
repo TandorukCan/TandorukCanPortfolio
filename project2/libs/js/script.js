@@ -376,7 +376,7 @@ $(document).ready(function () {
     }
   });
 
-  $(document).on("click", "#deletePersonnelModal", function () {
+  $(document).on("click", "#deletePersonnelButton", function () {
     // Confirm deletion
     var confirmDelete = confirm(
       "Are you sure you want to delete this personnel?"
@@ -389,7 +389,7 @@ $(document).ready(function () {
       console.log(personnelId);
       // Proceed with AJAX call to delete personnel
       $.ajax({
-        url: "./libs/php/deletePersonnel.php", // Replace with the correct PHP file
+        url: "./libs/php/deletePersonnelByID.php",
         type: "POST",
         dataType: "json",
         data: { id: personnelId }, // Send personnel ID to be deleted
@@ -398,6 +398,72 @@ $(document).ready(function () {
             alert("Personnel deleted successfully.");
             // Optionally refresh personnel list or update the UI
             loadPersonnelTable();
+          } else {
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+    }
+  });
+
+  $(document).on("click", "#deleteDepartmentButton", function () {
+    // Confirm deletion
+    var confirmDelete = confirm(
+      "Are you sure you want to delete this department?"
+    );
+
+    if (confirmDelete) {
+      console.log("you clicked on delete department");
+      // Get the personnel ID from the data-id attribute
+      var departmentId = $(this).data("id");
+      console.log(departmentId);
+      // Proceed with AJAX call to delete department
+      $.ajax({
+        url: "./libs/php/deleteDepartmentByID.php", // Replace with the correct PHP file
+        type: "POST",
+        dataType: "json",
+        data: { id: departmentId }, // Send personnel ID to be deleted
+        success: function (response) {
+          if (response.status.code == 200) {
+            loadDepartmentsTable();
+            alert("Department deleted successfully.");
+            // Optionally refresh personnel list or update the UI
+          } else {
+            alert("Error: " + response.status.message);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+    }
+  });
+
+  $(document).on("click", "#deleteLocationButton", function () {
+    // Confirm deletion
+    var confirmDelete = confirm(
+      "Are you sure you want to delete this location?"
+    );
+
+    if (confirmDelete) {
+      console.log("you clicked on delete location");
+      // Get the personnel ID from the data-id attribute
+      var locationId = $(this).data("id");
+      console.log(locationId);
+      // Proceed with AJAX call to delete location
+      $.ajax({
+        url: "./libs/php/deleteLocationByID.php", // Replace with the correct PHP file
+        type: "POST",
+        dataType: "json",
+        data: { id: locationId }, // Send personnel ID to be deleted
+        success: function (response) {
+          if (response.status.code == 200) {
+            alert("Location deleted successfully.");
+            // Optionally refresh personnel list or update the UI
+            loadLocationsTable();
           } else {
             alert("Error: " + response.status.message);
           }
@@ -554,7 +620,7 @@ function loadPersonnelTable() {
             <button
               type="button"
               class="btn btn-primary btn-sm"
-              id="deletePersonnelModal"
+              id="deletePersonnelButton"
               data-id="${person.id}"
             >
               <i class="fa-solid fa-trash fa-fw"></i>
@@ -608,7 +674,8 @@ function loadDepartmentsTable() {
               </button>
               <button
                 type="button"
-                class="btn btn-primary btn-sm deleteDepartmentBtn"
+                class="btn btn-primary btn-sm"
+                id="deleteDepartmentButton"
                 data-id="${department.id}"
               >
                 <i class="fa-solid fa-trash fa-fw"></i>
@@ -662,7 +729,8 @@ function loadLocationsTable() {
               </button>
               <button
                 type="button"
-                class="btn btn-primary btn-sm deleteDepartmentBtn"
+                class="btn btn-primary btn-sm"
+                id="deleteLocationButton"
                 data-id="${location.id}"
               >
                 <i class="fa-solid fa-trash fa-fw"></i>
