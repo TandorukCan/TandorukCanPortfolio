@@ -1,6 +1,8 @@
 $(document).ready(function () {
   // Call the function to load the personnel table when the page loads
   loadPersonnelTable();
+  loadLocationsTable();
+  loadDepartmentsTable();
 
   $("input[name='filter']").change(function () {
     // Check if the "Select All" radio button is selected
@@ -117,7 +119,7 @@ $(document).ready(function () {
     $("#searchInp").show();
     // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
     console.log("you clicked on personnel tab");
-    loadPersonnelTable();
+    // loadPersonnelTable(); // i figured doing this only once at the beginning is enough, therefore i placed it there. Might revert back if needed.
   });
 
   $("#departmentsBtn").click(function () {
@@ -128,7 +130,7 @@ $(document).ready(function () {
     $("#searchInp").val("");
     // $("#filterBtn").attr("data-bs-target", "#filterDepartmentModal");
     console.log("you clicked on departments tab");
-    loadDepartmentsTable();
+    // loadDepartmentsTable(); // i figured doing this only once at the beginning is enough, therefore i placed it there. Might revert back if needed.
   });
 
   $("#locationsBtn").click(function () {
@@ -139,7 +141,7 @@ $(document).ready(function () {
     $("#searchInp").val("");
     // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
     console.log("you clicked on locations tab");
-    loadLocationsTable();
+    // loadLocationsTable(); // i figured doing this only once at the beginning is enough, therefore i placed it there. Might revert back if needed.
   });
 
   $("#editPersonnelModal").on("show.bs.modal", function (e) {
