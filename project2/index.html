@@ -25,7 +25,13 @@
               <button id="refreshBtn" type="button" class="btn btn-primary">
                 <i class="fa-solid fa-refresh fa-fw"></i>
               </button>
-              <button id="filterBtn" type="button" class="btn btn-primary">
+              <button
+                id="filterBtn"
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#filterModal"
+              >
                 <i class="fa-solid fa-filter fa-fw"></i>
               </button>
               <button
@@ -239,6 +245,104 @@
               class="btn btn-outline-primary btn-sm myBtn"
             >
               SAVE
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm myBtn"
+              data-bs-dismiss="modal"
+            >
+              CANCEL
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="filterModal"
+      class="modal fade"
+      tabindex="-1"
+      data-bs-backdrop="false"
+      data-bs-keyboard="false"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <!--   the last two classes centre the modal and, if the content is too long, ensures  -->
+      <!--   that the header and footer are always on display by making the body scroll -->
+
+      <div
+        class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable"
+      >
+        <div class="modal-content shadow">
+          <div class="modal-header bg-primary bg-gradient text-white">
+            <h5 class="modal-title">Filter By:</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <form id="filterForm">
+              <div id="radioGroup" class="form-group">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="selectAll"
+                    name="filter"
+                    value="all"
+                    checked
+                  />
+                  <label class="form-check-label" for="selectAll"
+                    >Select All</label
+                  >
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="departments"
+                    name="filter"
+                    value="departments"
+                  />
+                  <label class="form-check-label" for="departments"
+                    >Departments</label
+                  >
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    id="locations"
+                    name="filter"
+                    value="locations"
+                  />
+                  <label class="form-check-label" for="locations"
+                    >Locations</label
+                  >
+                </div>
+                <select
+                  class="form-select"
+                  id="inputField"
+                  placeholder="Enter filter value"
+                  disabled
+                ></select>
+              </div>
+            </form>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              id="filterButton"
+              type="submit"
+              form="addPersonnelFilter"
+              class="btn btn-outline-primary btn-sm myBtn"
+              data-bs-dismiss="modal"
+            >
+              APPLY
             </button>
             <button
               type="button"

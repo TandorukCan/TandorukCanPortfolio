@@ -2,6 +2,36 @@ $(document).ready(function () {
   // Call the function to load the personnel table when the page loads
   loadPersonnelTable();
 
+  $("input[name='filter']").change(function () {
+    // Check if the "Select All" radio button is selected
+    if ($("#selectAll").is(":checked")) {
+      // Disable the input field
+      $("#inputField").prop("disabled", true);
+      $("#inputField").html("");
+      $("#filterButton").removeClass("locationButton");
+      $("#filterButton").removeClass("departmentButton");
+      console.log("Selected filter: none");
+    } else if ($("#departments").is(":checked")) {
+      // Enable the input field when other radio buttons are selected
+      $("#inputField").prop("disabled", false);
+      $("#filterButton").removeClass("locationButton");
+      $("#filterButton").addClass("departmentButton");
+      // add available departments as <options> to the <select> with the id of inputField
+      addDepartmentsToFilter();
+      console.log("Selected filter: departments");
+    } else {
+      // Enable the input field when other radio buttons are selected
+      $("#inputField").prop("disabled", false);
+      $("#filterButton").removeClass("departmentButton");
+      $("#filterButton").addClass("locationButton");
+      // add available locations as as <options> to the <select> with the id of inputField
+      addLocationsToFilter();
+      console.log("Selected filter: locations");
+    }
+    // var selectedValue = $("input[name='filter']:checked").val();
+    // console.log("Selected filter: " + selectedValue);
+  });
+
   $("#searchInp").on("keyup", function () {
     // your code
   });
@@ -26,6 +56,7 @@ $(document).ready(function () {
 
   $("#filterBtn").click(function () {
     // Open a modal of your own design that allows the user to apply a filter to the personnel table on either department or location
+    console.log("filter modal is shown");
   });
 
   $("#addBtn").click(function () {
@@ -47,6 +78,8 @@ $(document).ready(function () {
   $("#personnelBtn").click(function () {
     // Call function to refresh personnel table
     $("#addBtn").attr("data-bs-target", "#editPersonnelModal");
+    $("#filterBtn").show();
+    // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
     console.log("you clicked on personnel tab");
     loadPersonnelTable();
   });
@@ -54,6 +87,8 @@ $(document).ready(function () {
   $("#departmentsBtn").click(function () {
     // Call function to refresh department table\
     $("#addBtn").attr("data-bs-target", "#editDepartmentModal");
+    $("#filterBtn").hide();
+    // $("#filterBtn").attr("data-bs-target", "#filterDepartmentModal");
     console.log("you clicked on departments tab");
     loadDepartmentsTable();
   });
@@ -61,6 +96,8 @@ $(document).ready(function () {
   $("#locationsBtn").click(function () {
     // Call function to refresh location table
     $("#addBtn").attr("data-bs-target", "#editLocationModal");
+    $("#filterBtn").hide();
+    // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
     console.log("you clicked on locations tab");
     loadLocationsTable();
   });
@@ -474,6 +511,20 @@ $(document).ready(function () {
       });
     }
   });
+
+  $(document).on("click", "#filterButton", function () {
+    var filterValue = $("#inputField option:selected").text();
+    if ($("#filterButton").hasClass("departmentButton")) {
+      console.log("department filter is on");
+      filterTable(filterValue, "department");
+    } else if ($("#filterButton").hasClass("locationButton")) {
+      filterTable(filterValue, "location");
+      console.log("location filter is on");
+    } else {
+      filterTable(filterValue, "showEverything");
+      console.log("no filter is on");
+    }
+  });
 });
 
 $("#editDepartmentModal").on("show.bs.modal", function (e) {
@@ -749,5 +800,98 @@ function loadLocationsTable() {
         `Error retrieving data: ${errorThrown}`
       );
     },
+  });
+}
+
+function addLocationsToFilter() {
+  $.ajax({
+    url: "./libs/php/getAllLocations.php",
+    type: "GET",
+    dataType: "json",
+    success: function (result) {
+      var resultCode = result.status.code;
+
+      if (resultCode == 200) {
+        $("#inputField").html("");
+        $.each(result.data, function () {
+          $("#inputField").append(
+            $("<option>", {
+              value: this.id,
+              text: this.name,
+            })
+          );
+        });
+      } else {
+        $("#filterModal .modal-title").text("Error retrieving data");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#filterModal .modal-title").text(
+        `Error retrieving data: ${errorThrown}`
+      );
+    },
+  });
+}
+
+function addDepartmentsToFilter() {
+  $.ajax({
+    url: "./libs/php/getAllDepartments.php",
+    type: "GET",
+    dataType: "json",
+    success: function (result) {
+      var resultCode = result.status.code;
+
+      if (resultCode == 200) {
+        $("#inputField").html("");
+        $.each(result.data, function () {
+          $("#inputField").append(
+            $("<option>", {
+              value: this.id,
+              text: this.name,
+            })
+          );
+        });
+      } else {
+        $("#filterModal .modal-title").text("Error retrieving data");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      $("#filterModal .modal-title").text(
+        `Error retrieving data: ${errorThrown}`
+      );
+    },
+  });
+}
+//write a code to reset the fields in filter modal when it's class is equal to "modal fade" instead of "modal fade show"
+function filterTable(input, option) {
+  $("#personnelTableBody tr").each(function () {
+    // If the location is "Select All", show all rows
+    if (option === "showEverything") {
+      $(this).show();
+    } else if (option === "location") {
+      // Get the text of the third <td> (index 2)
+      var rowLocation = $(this).find("td:eq(2)").text().trim();
+
+      // Check if the location matches
+      if (rowLocation === input) {
+        // If it matches, show the row
+        $(this).show();
+      } else {
+        // If it doesn't match, hide the row
+        $(this).hide();
+      }
+    } else {
+      // Get the text of the third <td> (index 2)
+      var rowDepartment = $(this).find("td:eq(1)").text().trim();
+
+      // Check if the location matches
+      if (rowDepartment === input) {
+        // If it matches, show the row
+        $(this).show();
+      } else {
+        // If it doesn't match, hide the row
+        $(this).hide();
+      }
+    }
   });
 }
