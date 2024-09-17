@@ -32,8 +32,43 @@ $(document).ready(function () {
     // console.log("Selected filter: " + selectedValue);
   });
 
+  // Debounce the search function with a delay of 1000ms (1 second)
+  const debouncedSearch = debounce(function () {
+    // Get the search term
+    var searchTerm = $("#searchInp").val().trim();
+
+    if (searchTerm.length > 0) {
+      // Make AJAX request to searchAll.php
+      $.ajax({
+        url: "./libs/php/searchAll.php",
+        type: "GET",
+        dataType: "json",
+        data: { txt: searchTerm },
+        success: function (response) {
+          if (response.status.code == 200) {
+            // Update the table with the search results
+            loadPersonnelTable(response.data.found);
+            console.log(response);
+          } else {
+            alert("Error: " + response.status.description);
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert("AJAX error: " + textStatus + " - " + errorThrown);
+        },
+      });
+    } else {
+      // Clear the table if search term is empty
+      loadPersonnelTable(); // Assuming you have a function to load the full table
+    }
+  }, 1000); // 1000ms delay
+
   $("#searchInp").on("keyup", function () {
-    // your code
+    // Show the loader
+    $("#personnelLoader").show();
+
+    // Call the debounced search function
+    debouncedSearch();
   });
 
   $("#refreshBtn").click(function () {
@@ -79,6 +114,7 @@ $(document).ready(function () {
     // Call function to refresh personnel table
     $("#addBtn").attr("data-bs-target", "#editPersonnelModal");
     $("#filterBtn").show();
+    $("#searchInp").show();
     // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
     console.log("you clicked on personnel tab");
     loadPersonnelTable();
@@ -88,6 +124,8 @@ $(document).ready(function () {
     // Call function to refresh department table\
     $("#addBtn").attr("data-bs-target", "#editDepartmentModal");
     $("#filterBtn").hide();
+    $("#searchInp").hide();
+    $("#searchInp").val("");
     // $("#filterBtn").attr("data-bs-target", "#filterDepartmentModal");
     console.log("you clicked on departments tab");
     loadDepartmentsTable();
@@ -97,6 +135,8 @@ $(document).ready(function () {
     // Call function to refresh location table
     $("#addBtn").attr("data-bs-target", "#editLocationModal");
     $("#filterBtn").hide();
+    $("#searchInp").hide();
+    $("#searchInp").val("");
     // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
     console.log("you clicked on locations tab");
     loadLocationsTable();
@@ -635,64 +675,75 @@ $("#editLocationModal").on("show.bs.modal", function (e) {
   }
 });
 
-function loadPersonnelTable() {
-  $.ajax({
-    url: "./libs/php/getAll.php",
-    type: "GET",
-    dataType: "json",
-    success: function (result) {
-      console.log(result);
-      var resultCode = result.status.code;
-
-      if (resultCode == 200) {
-        // Update the hidden input with the employee id so that
-        // it can be referenced when the form is submitted
-
-        // Clear any existing rows in the table body
-        $("#personnelTableBody").empty();
-
-        $.each(result.data, function (index, person) {
-          $("#personnelTableBody").append(`
-        <tr>
-          <td class="align-middle text-nowrap">${person.lastName}, ${person.firstName}</td>
-          <td class="align-middle text-nowrap d-md-table-cell">${person.department}</td>
-          <td class="align-middle text-nowrap d-md-table-cell">${person.location}</td>
-          <td class="align-middle text-nowrap d-md-table-cell">${person.email}</td>
-          <td class="text-end text-nowrap">
-            <button
-              type="button"
-              class="btn btn-primary btn-sm"
-              data-bs-toggle="modal"
-              data-bs-target="#editPersonnelModal"
-              data-id="${person.id}"
-            >
-              <i class="fa-solid fa-pencil fa-fw"></i>
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary btn-sm"
-              id="deletePersonnelButton"
-              data-id="${person.id}"
-            >
-              <i class="fa-solid fa-trash fa-fw"></i>
-            </button>
-          </td>
-        </tr>
-      `);
-        });
-      } else {
-        console.log("ERROR");
-      }
-    },
-    error: function (jqXHR, textStatus, errorThrown) {
-      $("#editPersonnelModal .modal-title").text(
-        `Error retrieving data: ${errorThrown}`
-      );
-    },
+function populateTable(data) {
+  console.log(data);
+  $.each(data, function (index, person) {
+    $("#personnelTableBody").append(`
+    <tr>
+      <td class="align-middle text-nowrap">${person.lastName}, ${person.firstName}</td>
+      <td class="align-middle text-nowrap d-md-table-cell">${person.jobTitle}</td>
+      <td class="align-middle text-nowrap d-md-table-cell">${person.department}</td>
+      <td class="align-middle text-nowrap d-md-table-cell">${person.location}</td>
+      <td class="align-middle text-nowrap d-md-table-cell">${person.email}</td>
+      <td class="text-end text-nowrap">
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#editPersonnelModal"
+          data-id="${person.id}"
+        >
+          <i class="fa-solid fa-pencil fa-fw"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          id="deletePersonnelButton"
+          data-id="${person.id}"
+        >
+          <i class="fa-solid fa-trash fa-fw"></i>
+        </button>
+      </td>
+    </tr>
+`);
   });
 }
 
+function loadPersonnelTable(searchTerm) {
+  $("#personnelTableBody").empty().append(`<div id="personnelLoader"></div>`);
+  if (searchTerm) {
+    // table will be populated based on search term
+    populateTable(searchTerm);
+    $("#personnelLoader").hide();
+  } else {
+    $.ajax({
+      url: "./libs/php/getAll.php",
+      type: "GET",
+      dataType: "json",
+      success: function (result) {
+        var resultCode = result.status.code;
+
+        if (resultCode == 200) {
+          // Update the hidden input with the employee id so that
+          // it can be referenced when the form is submitted
+          populateTable(result.data);
+          $("#personnelLoader").hide();
+        } else {
+          console.log("ERROR");
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        $("#editPersonnelModal .modal-title").text(
+          `Error retrieving data: ${errorThrown}`
+        );
+      },
+    });
+  }
+}
+
 function loadDepartmentsTable() {
+  // Clear any existing rows in the table body and add a loader
+  $("#departmentTableBody").empty().append(`<div id="departmentLoader"></div>`);
   $.ajax({
     url: "./libs/php/getAllDepartments.php",
     type: "GET",
@@ -704,10 +755,6 @@ function loadDepartmentsTable() {
       if (resultCode == 200) {
         // Update the hidden input with the employee id so that
         // it can be referenced when the form is submitted
-
-        // Clear any existing rows in the table body
-        $("#departmentTableBody").empty();
-
         $.each(result.data, function (index, department) {
           $("#departmentTableBody").append(`
             <tr>
@@ -734,6 +781,7 @@ function loadDepartmentsTable() {
             </td>
           </tr>
         `);
+          $("#departmentLoader").hide();
         });
       } else {
         console.log("ERROR");
@@ -749,6 +797,8 @@ function loadDepartmentsTable() {
 }
 
 function loadLocationsTable() {
+  // Clear any existing rows in the table body and add a loader
+  $("#locationTableBody").empty().append(`<div id="locationLoader"></div>`);
   $.ajax({
     url: "./libs/php/getAllLocations.php",
     type: "GET",
@@ -760,9 +810,6 @@ function loadLocationsTable() {
       if (resultCode == 200) {
         // Update the hidden input with the employee id so that
         // it can be referenced when the form is submitted
-
-        // Clear any existing rows in the table body
-        $("#locationTableBody").empty();
 
         $.each(result.data, function (index, location) {
           $("#locationTableBody").append(`
@@ -789,6 +836,7 @@ function loadLocationsTable() {
             </td>
           </tr>
         `);
+          $("#locationLoader").hide();
         });
       } else {
         console.log("ERROR");
@@ -870,7 +918,7 @@ function filterTable(input, option) {
       $(this).show();
     } else if (option === "location") {
       // Get the text of the third <td> (index 2)
-      var rowLocation = $(this).find("td:eq(2)").text().trim();
+      var rowLocation = $(this).find("td:eq(3)").text().trim();
 
       // Check if the location matches
       if (rowLocation === input) {
@@ -882,7 +930,7 @@ function filterTable(input, option) {
       }
     } else {
       // Get the text of the third <td> (index 2)
-      var rowDepartment = $(this).find("td:eq(1)").text().trim();
+      var rowDepartment = $(this).find("td:eq(2)").text().trim();
 
       // Check if the location matches
       if (rowDepartment === input) {
@@ -894,4 +942,12 @@ function filterTable(input, option) {
       }
     }
   });
+}
+
+function debounce(func, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func.apply(this, args), delay);
+  };
 }
