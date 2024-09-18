@@ -341,6 +341,7 @@ $(document).ready(function () {
             alert("Department information updated successfully.");
             // Optionally refresh the table data
             loadDepartmentsTable();
+            loadPersonnelTable();
           } else {
             // Handle error response
             alert("Error: " + response.status.message);
@@ -409,6 +410,8 @@ $(document).ready(function () {
             alert("Location information updated successfully.");
             // Optionally refresh the table data
             loadLocationsTable();
+            loadDepartmentsTable();
+            loadPersonnelTable();
           } else {
             // Handle error response
             alert("Error: " + response.status.message);
