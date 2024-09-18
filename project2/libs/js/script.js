@@ -504,6 +504,7 @@ $(document).ready(function () {
         success: function (response) {
           if (response.status.code == 200) {
             loadDepartmentsTable();
+            loadPersonnelTable();
             alert("Department deleted successfully.");
             // Optionally refresh personnel list or update the UI
           } else {
@@ -539,6 +540,8 @@ $(document).ready(function () {
             alert("Location deleted successfully.");
             // Optionally refresh personnel list or update the UI
             loadLocationsTable();
+            loadDepartmentsTable();
+            loadPersonnelTable();
           } else {
             alert("Error: " + response.status.message);
           }
