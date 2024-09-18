@@ -12,7 +12,7 @@ $(document).ready(function () {
       $("#inputField").html("");
       $("#filterButton").removeClass("locationButton");
       $("#filterButton").removeClass("departmentButton");
-      console.log("Selected filter: none");
+      // console.log("Selected filter: none");
     } else if ($("#departments").is(":checked")) {
       // Enable the input field when other radio buttons are selected
       $("#inputField").prop("disabled", false);
@@ -20,7 +20,7 @@ $(document).ready(function () {
       $("#filterButton").addClass("departmentButton");
       // add available departments as <options> to the <select> with the id of inputField
       addDepartmentsToFilter();
-      console.log("Selected filter: departments");
+      // console.log("Selected filter: departments");
     } else {
       // Enable the input field when other radio buttons are selected
       $("#inputField").prop("disabled", false);
@@ -28,7 +28,7 @@ $(document).ready(function () {
       $("#filterButton").addClass("locationButton");
       // add available locations as as <options> to the <select> with the id of inputField
       addLocationsToFilter();
-      console.log("Selected filter: locations");
+      // console.log("Selected filter: locations");
     }
     // var selectedValue = $("input[name='filter']:checked").val();
     // console.log("Selected filter: " + selectedValue);
@@ -50,7 +50,7 @@ $(document).ready(function () {
           if (response.status.code == 200) {
             // Update the table with the search results
             loadPersonnelTable(response.data.found);
-            console.log(response);
+            // console.log(response);
           } else {
             alert("Error: " + response.status.description);
           }
@@ -76,16 +76,16 @@ $(document).ready(function () {
   $("#refreshBtn").click(function () {
     if ($("#personnelBtn").hasClass("active")) {
       // Refresh personnel table
-      console.log("you are in personnel");
+      // console.log("you are in personnel");
       loadPersonnelTable();
     } else {
       if ($("#departmentsBtn").hasClass("active")) {
-        console.log("you are in departments");
+        // console.log("you are in departments");
         loadDepartmentsTable();
         // Refresh department table
       } else {
         // Refresh location table
-        console.log("you are in locations");
+        // console.log("you are in locations");
         loadLocationsTable();
       }
     }
@@ -93,21 +93,21 @@ $(document).ready(function () {
 
   $("#filterBtn").click(function () {
     // Open a modal of your own design that allows the user to apply a filter to the personnel table on either department or location
-    console.log("filter modal is shown");
+    // console.log("filter modal is shown");
   });
 
   $("#addBtn").click(function () {
     // Replicate the logic of the refresh button click to open the add modal for the table that is currently on display
     if ($("#personnelBtn").hasClass("active")) {
       // Refresh personnel table
-      console.log("you are adding in personnel");
+      // console.log("you are adding in personnel");
     } else {
       if ($("#departmentsBtn").hasClass("active")) {
-        console.log("you are adding in departments");
+        // console.log("you are adding in departments");
         // Refresh department table
       } else {
         // Refresh location table
-        console.log("you are adding in locations");
+        // console.log("you are adding in locations");
       }
     }
   });
@@ -118,7 +118,7 @@ $(document).ready(function () {
     $("#filterBtn").show();
     $("#searchInp").show();
     // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
-    console.log("you clicked on personnel tab");
+    // console.log("you clicked on personnel tab");
     // loadPersonnelTable(); // i figured doing this only once at the beginning is enough, therefore i placed it there. Might revert back if needed.
   });
 
@@ -129,7 +129,7 @@ $(document).ready(function () {
     $("#searchInp").hide();
     $("#searchInp").val("");
     // $("#filterBtn").attr("data-bs-target", "#filterDepartmentModal");
-    console.log("you clicked on departments tab");
+    // console.log("you clicked on departments tab");
     // loadDepartmentsTable(); // i figured doing this only once at the beginning is enough, therefore i placed it there. Might revert back if needed.
   });
 
@@ -140,7 +140,7 @@ $(document).ready(function () {
     $("#searchInp").hide();
     $("#searchInp").val("");
     // $("#filterBtn").attr("data-bs-target", "#filterPersonnelModal");
-    console.log("you clicked on locations tab");
+    // console.log("you clicked on locations tab");
     // loadLocationsTable(); // i figured doing this only once at the beginning is enough, therefore i placed it there. Might revert back if needed.
   });
 
@@ -158,13 +158,13 @@ $(document).ready(function () {
           id: $(e.relatedTarget).attr("data-id"),
         },
         success: function (result) {
-          console.log($(e.relatedTarget).attr("data-id"));
+          // console.log($(e.relatedTarget).attr("data-id"));
           var resultCode = result.status.code;
 
           if (resultCode == 200) {
             // Update the hidden input with the employee id so that
             // it can be referenced when the form is submitted
-            console.log(result);
+            // console.log(result);
 
             $("#editPersonnelEmployeeID").val(result.data.personnel[0].id);
 
@@ -213,7 +213,7 @@ $(document).ready(function () {
         type: "GET",
         dataType: "json",
         success: function (result) {
-          console.log(result);
+          // console.log(result);
           var resultCode = result.status.code;
 
           if (resultCode == 200) {
@@ -311,7 +311,7 @@ $(document).ready(function () {
           alert("AJAX error: " + textStatus + " - " + errorThrown);
         },
       });
-      console.log("inserted personnel data");
+      // console.log("inserted personnel data");
     }
   });
 
@@ -351,7 +351,6 @@ $(document).ready(function () {
           alert("AJAX error: " + textStatus + " - " + errorThrown);
         },
       });
-      console.log("pretending to edit department data");
       //above code will me commented in once updateDepartment.php is created
     } else {
       var formData = {
@@ -381,7 +380,6 @@ $(document).ready(function () {
           alert("AJAX error: " + textStatus + " - " + errorThrown);
         },
       });
-      console.log("pretending to insert department data");
       //above code will me commented in once insertDepartment.php is checked and made sure to be working
     }
   });
@@ -421,8 +419,7 @@ $(document).ready(function () {
           alert("AJAX error: " + textStatus + " - " + errorThrown);
         },
       });
-      console.log("editing location data");
-      //above code will me commented in once updateDepartment.php is created
+      // console.log("editing location data");
     } else {
       var formData = {
         name: $("#editLocationName").val(),
@@ -450,8 +447,7 @@ $(document).ready(function () {
           alert("AJAX error: " + textStatus + " - " + errorThrown);
         },
       });
-      console.log("inserted location data");
-      //above code will me commented in once insertDepartment.php is checked and made sure to be working
+      // console.log("inserted location data");
     }
   });
 
@@ -462,10 +458,10 @@ $(document).ready(function () {
     );
 
     if (confirmDelete) {
-      console.log("you clicked on delete personnel");
+      // console.log("you clicked on delete personnel");
       // Get the personnel ID from the data-id attribute
       var personnelId = $(this).data("id");
-      console.log(personnelId);
+      // console.log(personnelId);
       // Proceed with AJAX call to delete personnel
       $.ajax({
         url: "./libs/php/deletePersonnelByID.php",
@@ -495,10 +491,10 @@ $(document).ready(function () {
     );
 
     if (confirmDelete) {
-      console.log("you clicked on delete department");
+      // console.log("you clicked on delete department");
       // Get the personnel ID from the data-id attribute
       var departmentId = $(this).data("id");
-      console.log(departmentId);
+      // console.log(departmentId);
       // Proceed with AJAX call to delete department
       $.ajax({
         url: "./libs/php/deleteDepartmentByID.php", // Replace with the correct PHP file
@@ -528,10 +524,10 @@ $(document).ready(function () {
     );
 
     if (confirmDelete) {
-      console.log("you clicked on delete location");
+      // console.log("you clicked on delete location");
       // Get the personnel ID from the data-id attribute
       var locationId = $(this).data("id");
-      console.log(locationId);
+      // console.log(locationId);
       // Proceed with AJAX call to delete location
       $.ajax({
         url: "./libs/php/deleteLocationByID.php", // Replace with the correct PHP file
@@ -557,14 +553,14 @@ $(document).ready(function () {
   $(document).on("click", "#filterButton", function () {
     var filterValue = $("#inputField option:selected").text();
     if ($("#filterButton").hasClass("departmentButton")) {
-      console.log("department filter is on");
+      // console.log("department filter is on");
       filterTable(filterValue, "department");
     } else if ($("#filterButton").hasClass("locationButton")) {
       filterTable(filterValue, "location");
-      console.log("location filter is on");
+      // console.log("location filter is on");
     } else {
       filterTable(filterValue, "showEverything");
-      console.log("no filter is on");
+      // console.log("no filter is on");
     }
   });
 });
@@ -648,13 +644,13 @@ $("#editLocationModal").on("show.bs.modal", function (e) {
         id: $(e.relatedTarget).attr("data-id"),
       },
       success: function (result) {
-        console.log($(e.relatedTarget).attr("data-id"));
+        // console.log($(e.relatedTarget).attr("data-id"));
         var resultCode = result.status.code;
 
         if (resultCode == 200) {
           // Update the hidden input with the employee id so that
           // it can be referenced when the form is submitted
-          console.log(result);
+          // console.log(result);
 
           $("#editLocationID").val(result.data[0].id);
           $("#editLocationName").val(result.data[0].name);
@@ -673,12 +669,12 @@ $("#editLocationModal").on("show.bs.modal", function (e) {
     $("#editLocationName").val("");
     $("#editLocationID").val("");
 
-    console.log("i'm in adding mode");
+    // console.log("i'm in adding mode");
   }
 });
 
 function populateTable(data) {
-  console.log(data);
+  // console.log(data);
   $.each(data, function (index, person) {
     $("#personnelTableBody").append(`
     <tr>
@@ -712,7 +708,14 @@ function populateTable(data) {
 }
 
 function loadPersonnelTable(searchTerm) {
-  $("#personnelTableBody").empty().append(`<div id="personnelLoader"></div>`);
+  $("#personnelTableBody")
+    .empty()
+    .append(`<div id="personnelLoader" style="display: none;"></div>`);
+
+  if (!$("#mainLoader").is(":visible")) {
+    $("#personnelLoader").show();
+  }
+
   if (searchTerm) {
     // table will be populated based on search term
     populateTable(searchTerm);
@@ -729,7 +732,11 @@ function loadPersonnelTable(searchTerm) {
           // Update the hidden input with the employee id so that
           // it can be referenced when the form is submitted
           populateTable(result.data);
-          $("#personnelLoader").hide();
+          if ($("#mainLoader").is(":visible")) {
+            $("#mainLoader").hide();
+          } else {
+            $("#personnelLoader").hide();
+          }
         } else {
           console.log("ERROR");
         }
@@ -751,7 +758,7 @@ function loadDepartmentsTable() {
     type: "GET",
     dataType: "json",
     success: function (result) {
-      console.log(result);
+      // console.log(result);
       var resultCode = result.status.code;
 
       if (resultCode == 200) {
@@ -806,7 +813,7 @@ function loadLocationsTable() {
     type: "GET",
     dataType: "json",
     success: function (result) {
-      console.log(result);
+      // console.log(result);
       var resultCode = result.status.code;
 
       if (resultCode == 200) {
