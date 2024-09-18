@@ -684,10 +684,18 @@ function populateTable(data) {
   $.each(data, function (index, person) {
     $("#personnelTableBody").append(`
     <tr>
-      <td class="align-middle text-nowrap">${person.lastName}, ${person.firstName}</td>
-      <td class="align-middle text-nowrap d-md-table-cell">${person.jobTitle}</td>
-      <td class="align-middle text-nowrap d-md-table-cell">${person.department}</td>
-      <td class="align-middle text-nowrap d-md-table-cell">${person.location}</td>
+      <td class="align-middle text-nowrap">${
+        person.lastName
+      }, ${person.firstName}</td>
+      <td class="align-middle text-nowrap d-md-table-cell">${
+        person.jobTitle
+      }</td>
+      <td class="align-middle text-nowrap d-md-table-cell">${
+        person.department ? person.department : "has not been assigned"
+      }</td>
+      <td class="align-middle text-nowrap d-md-table-cell"> ${
+        person.location ? person.location : "has not been assigned"
+      }</td>
       <td class="align-middle text-nowrap d-md-table-cell">${person.email}</td>
       <td class="text-end text-nowrap">
         <button
@@ -774,7 +782,11 @@ function loadDepartmentsTable() {
           $("#departmentTableBody").append(`
             <tr>
             <td class="align-middle text-nowrap">${department.name}</td>
-            <td class="align-middle text-nowrap d-md-table-cell">${department.locationName}</td>
+            <td class="align-middle text-nowrap d-md-table-cell">${
+              department.locationName
+                ? department.locationName
+                : "has not been assigned"
+            }</td>
             <td class="align-middle text-end text-nowrap">
               <button
                 type="button"
