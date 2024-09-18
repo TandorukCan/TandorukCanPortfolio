@@ -1,15 +1,13 @@
 <?php
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-	// connection details for MySQL database
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv->load();
 
-	$cd_host = "127.0.0.1";
-	$cd_port = 3306;
-	$cd_socket = "";
-
-	// database name, username and password
-
-	$cd_dbname = "companydirectory";
-	$cd_user = "root";
-	$cd_password = "H*1h2h3h4";
-
+$cd_host = $_ENV['CD_HOST'];
+$cd_port = $_ENV['CD_PORT'];
+$cd_dbname = $_ENV['CD_DBNAME'];
+$cd_user = $_ENV['CD_USER'];
+$cd_password = $_ENV['CD_PASSWORD'];
+$cd_socket = "";
 ?>
