@@ -24,13 +24,18 @@
             <input
               id="searchInp"
               class="form-control mb-3"
-              placeholder="search"
+              placeholder="Search"
             />
           </div>
 
           <div class="col-6 text-end me-2">
             <div class="btn-group" role="group" aria-label="buttons">
-              <button id="refreshBtn" type="button" class="btn btn-primary">
+              <button
+                id="refreshBtn"
+                type="button"
+                class="btn btn-primary"
+                aria-label="refresh"
+              >
                 <i class="fa-solid fa-refresh fa-fw"></i>
               </button>
               <button
@@ -39,6 +44,7 @@
                 class="btn btn-primary"
                 data-bs-toggle="modal"
                 data-bs-target="#filterModal"
+                aria-label="filter"
               >
                 <i class="fa-solid fa-filter fa-fw"></i>
               </button>
@@ -47,7 +53,8 @@
                 type="button"
                 class="btn btn-primary"
                 data-bs-toggle="modal"
-                data-bs-target="#editPersonnelModal"
+                data-bs-target="#personnelModal"
+                aria-label="add"
               >
                 <i class="fa-solid fa-plus fa-fw"></i>
               </button>
@@ -66,6 +73,7 @@
               role="tab"
               aria-controls="home-tab-pane"
               aria-selected="true"
+              aria-label="Personnel"
             >
               <i class="fa-solid fa-person fa-lg fa-fw"></i
               ><span class="d-none d-sm-block">Personnel</span>
@@ -81,6 +89,7 @@
               role="tab"
               aria-controls="profile-tab-pane"
               aria-selected="false"
+              aria-label="Departments"
             >
               <i class="fa-solid fa-building fa-lg fa-fw"></i
               ><span class="d-none d-sm-block">Departments</span>
@@ -96,6 +105,7 @@
               role="tab"
               aria-controls="contact-tab-pane"
               aria-selected="false"
+              aria-label="Locations"
             >
               <i class="fa-solid fa-map-location-dot fa-lg fa-fw"></i
               ><span class="d-none d-sm-block">Locations</span>
@@ -131,6 +141,7 @@
                 type="button"
                 class="btn btn-secondary"
                 data-bs-dismiss="modal"
+                aria-label="Cancel"
               >
                 Cancel
               </button>
@@ -138,6 +149,7 @@
                 type="button"
                 class="btn btn-danger"
                 id="confirmDeletePersonnelBtn"
+                aria-label="Delete Personnel"
               >
                 Delete
               </button>
@@ -173,6 +185,7 @@
                 type="button"
                 class="btn btn-secondary"
                 data-bs-dismiss="modal"
+                aria-label="Cancel"
               >
                 Cancel
               </button>
@@ -180,6 +193,7 @@
                 type="button"
                 class="btn btn-danger"
                 id="confirmDeleteDepartmentBtn"
+                aria-label="Delete Department"
               >
                 Delete
               </button>
@@ -215,6 +229,7 @@
                 type="button"
                 class="btn btn-secondary"
                 data-bs-dismiss="modal"
+                aria-label="Cancel"
               >
                 Cancel
               </button>
@@ -222,6 +237,7 @@
                 type="button"
                 class="btn btn-danger"
                 id="confirmDeleteLocationBtn"
+                aria-label="Delete Location"
               >
                 Delete
               </button>
@@ -242,10 +258,11 @@
             <thead>
               <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Job Title</th>
+                <th scope="col" class="d-lg-table-cell d-none">Job Title</th>
                 <th scope="col">Department</th>
                 <th scope="col">Location</th>
-                <th scope="col">Email</th>
+                <th scope="col" class="d-lg-table-cell d-none">Email</th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody id="personnelTableBody" class="modal-body">
@@ -295,7 +312,7 @@
     </section>
 
     <div
-      id="editPersonnelModal"
+      id="personnelModal"
       class="modal fade"
       tabindex="-1"
       data-bs-backdrop="false"
@@ -321,60 +338,60 @@
           </div>
 
           <div class="modal-body">
-            <form id="editPersonnelForm">
-              <input type="hidden" id="editPersonnelEmployeeID" />
+            <form id="personnelForm">
+              <input type="hidden" id="personnelEmployeeID" />
 
               <div class="form-floating mb-3">
                 <input
                   type="text"
                   class="form-control"
-                  id="editPersonnelFirstName"
+                  id="personnelFirstName"
                   placeholder="First name"
                   required
                 />
-                <label for="editPersonnelFirstName">First name</label>
+                <label for="personnelFirstName">First name</label>
               </div>
 
               <div class="form-floating mb-3">
                 <input
                   type="text"
                   class="form-control"
-                  id="editPersonnelLastName"
+                  id="personnelLastName"
                   placeholder="Last name"
                   required
                 />
-                <label for="editPersonnelLastName">Last name</label>
+                <label for="personnelLastName">Last name</label>
               </div>
 
               <div class="form-floating mb-3">
                 <input
                   type="text"
                   class="form-control"
-                  id="editPersonnelJobTitle"
+                  id="personnelJobTitle"
                   placeholder="Job title"
                   required
                 />
-                <label for="editPersonnelJobTitle">Job Title</label>
+                <label for="personnelJobTitle">Job Title</label>
               </div>
 
               <div class="form-floating mb-3">
                 <input
                   type="email"
                   class="form-control"
-                  id="editPersonnelEmailAddress"
+                  id="personnelEmailAddress"
                   placeholder="Email address"
                   required
                 />
-                <label for="editPersonnelEmailAddress">Email Address</label>
+                <label for="personnelEmailAddress">Email Address</label>
               </div>
 
               <div class="form-floating">
                 <select
                   class="form-select"
-                  id="editPersonnelDepartment"
+                  id="personnelDepartment"
                   placeholder="Department"
                 ></select>
-                <label for="editPersonnelDepartment">Department</label>
+                <label for="personnelDepartment">Department</label>
               </div>
             </form>
           </div>
@@ -382,8 +399,9 @@
           <div class="modal-footer">
             <button
               type="submit"
-              form="editPersonnelForm"
+              form="personnelForm"
               class="btn btn-outline-primary btn-sm myBtn"
+              aria-label="Save Personnel"
             >
               SAVE
             </button>
@@ -391,6 +409,7 @@
               type="button"
               class="btn btn-outline-primary btn-sm myBtn"
               data-bs-dismiss="modal"
+              aria-label="Cancel"
             >
               CANCEL
             </button>
@@ -482,6 +501,7 @@
               form="addPersonnelFilter"
               class="btn btn-outline-primary btn-sm myBtn"
               data-bs-dismiss="modal"
+              aria-label="Apply Filter"
             >
               APPLY
             </button>
@@ -489,6 +509,7 @@
               type="button"
               class="btn btn-outline-primary btn-sm myBtn"
               data-bs-dismiss="modal"
+              aria-label="Cancel"
             >
               CANCEL
             </button>
@@ -498,7 +519,7 @@
     </div>
 
     <div
-      id="editDepartmentModal"
+      id="departmentModal"
       class="modal fade"
       tabindex="-1"
       data-bs-backdrop="false"
@@ -524,27 +545,27 @@
           </div>
 
           <div class="modal-body">
-            <form id="editDepartmentForm">
-              <input type="hidden" id="editDepartmentID" />
+            <form id="departmentForm">
+              <input type="hidden" id="departmentID" />
 
               <div class="form-floating mb-3">
                 <input
                   type="text"
                   class="form-control"
-                  id="editDepartmentName"
+                  id="departmentName"
                   placeholder="Name"
                   required
                 />
-                <label for="editDepartmentName">Department Name</label>
+                <label for="departmentName">Department Name</label>
               </div>
 
               <div class="form-floating mb-3">
                 <select
                   class="form-select"
-                  id="editLocation"
+                  id="departmentLocation"
                   placeholder="Location Name"
                 ></select>
-                <label for="editLocation">Location Name</label>
+                <label for="departmentLocation">Location Name</label>
               </div>
             </form>
           </div>
@@ -552,8 +573,9 @@
           <div class="modal-footer">
             <button
               type="submit"
-              form="editDepartmentForm"
+              form="departmentForm"
               class="btn btn-outline-primary btn-sm myBtn"
+              aria-label="Save Department"
             >
               SAVE
             </button>
@@ -561,6 +583,7 @@
               type="button"
               class="btn btn-outline-primary btn-sm myBtn"
               data-bs-dismiss="modal"
+              aria-label="Cancel"
             >
               CANCEL
             </button>
@@ -570,7 +593,7 @@
     </div>
 
     <div
-      id="editLocationModal"
+      id="locationModal"
       class="modal fade"
       tabindex="-1"
       data-bs-backdrop="false"
@@ -596,18 +619,18 @@
           </div>
 
           <div class="modal-body">
-            <form id="editLocationForm">
-              <input type="hidden" id="editLocationID" />
+            <form id="locationForm">
+              <input type="hidden" id="locationID" />
 
               <div class="form-floating mb-3">
                 <input
                   type="text"
                   class="form-control"
-                  id="editLocationName"
+                  id="locationName"
                   placeholder="Name"
                   required
                 />
-                <label for="editLocationName">Location Name</label>
+                <label for="locationName">Location Name</label>
               </div>
             </form>
           </div>
@@ -615,8 +638,9 @@
           <div class="modal-footer">
             <button
               type="submit"
-              form="editLocationForm"
+              form="locationForm"
               class="btn btn-outline-primary btn-sm myBtn"
+              aria-label="Save Location"
             >
               SAVE
             </button>
@@ -624,6 +648,7 @@
               type="button"
               class="btn btn-outline-primary btn-sm myBtn"
               data-bs-dismiss="modal"
+              aria-label="Cancel"
             >
               CANCEL
             </button>
@@ -657,6 +682,7 @@
               type="button"
               class="btn btn-primary"
               data-bs-dismiss="modal"
+              aria-label="Acknowledge"
             >
               OK
             </button>
@@ -692,6 +718,7 @@
               type="button"
               class="btn btn-danger"
               data-bs-dismiss="modal"
+              aria-label="Acknowledge"
             >
               OK
             </button>
