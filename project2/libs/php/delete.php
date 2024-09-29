@@ -1,4 +1,5 @@
 <?php
+
 // Remove the next two lines for production
 ini_set('display_errors', 'On');
 error_reporting(E_ALL);
@@ -9,13 +10,32 @@ include("config.php");
 
 header('Content-Type: application/json; charset=UTF-8');
 
-// Check if the ID was provided in the request
-if (!isset($_POST['id']) || empty($_POST['id'])) {
+// Check if the ID and type were provided in the request
+if (!isset($_POST['id']) || empty($_POST['id']) || !isset($_POST['type']) || empty($_POST['type'])) {
     $output['status']['code'] = 400;
     $output['status']['name'] = "invalid";
-    $output['status']['description'] = "Personnel ID is missing or invalid.";
+    $output['status']['description'] = "ID or type is missing or invalid.";
     echo json_encode($output);
     exit;
+}
+
+// Determine the table based on the 'type' parameter
+switch ($_POST['type']) {
+    case 'department':
+        $table = 'department';
+        break;
+    case 'location':
+        $table = 'location';
+        break;
+    case 'personnel':
+        $table = 'personnel';
+        break;
+    default:
+        $output['status']['code'] = 400;
+        $output['status']['name'] = "invalid";
+        $output['status']['description'] = "Invalid type specified.";
+        echo json_encode($output);
+        exit;
 }
 
 // Connect to the database
@@ -29,10 +49,10 @@ if (mysqli_connect_errno()) {
     exit;
 }
 
-// Prepare SQL query to delete the personnel record
-$query = $conn->prepare("DELETE FROM personnel WHERE id = ?");
+// Prepare SQL query to delete the record from the correct table
+$query = $conn->prepare("DELETE FROM $table WHERE id = ?");
 
-// Bind the personnel ID to the query
+// Bind the ID to the query
 $query->bind_param("i", $_POST['id']);
 
 $query->execute();
@@ -41,11 +61,11 @@ $query->execute();
 if ($query->affected_rows > 0) {
     $output['status']['code'] = 200;
     $output['status']['name'] = "ok";
-    $output['status']['description'] = "Personnel deleted successfully.";
+    $output['status']['description'] = ucfirst($table) . " deleted successfully.";
 } else {
     $output['status']['code'] = 204;
     $output['status']['name'] = "no change";
-    $output['status']['description'] = "No personnel found with the provided ID.";
+    $output['status']['description'] = "No record found with the provided ID.";
 }
 
 // Close the connection
@@ -55,4 +75,5 @@ $executionEndTime = microtime(true);
 $output['status']['returnedIn'] = ($executionEndTime - $executionStartTime) / 1000 . " ms";
 
 echo json_encode($output);
+
 ?>

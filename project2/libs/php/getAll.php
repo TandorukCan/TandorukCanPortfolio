@@ -1,74 +1,124 @@
 <?php
 
-	// example use from browser
-	// http://localhost/companydirectory/libs/php/getAll.php
+// Remove next two lines for production
+ini_set('display_errors', 'On');
+error_reporting(E_ALL);
 
-	// remove next two lines for production
-	
-	ini_set('display_errors', 'On');
-	error_reporting(E_ALL);
+$executionStartTime = microtime(true);
 
-	$executionStartTime = microtime(true);
+include("config.php");
 
-	include("config.php");
+header('Content-Type: application/json; charset=UTF-8');
 
-	header('Content-Type: application/json; charset=UTF-8');
+// Connect to the database
+$conn = new mysqli($cd_host, $cd_user, $cd_password, $cd_dbname, $cd_port, $cd_socket);
 
-	$conn = new mysqli($cd_host, $cd_user, $cd_password, $cd_dbname, $cd_port, $cd_socket);
+if (mysqli_connect_errno()) {
+    $output['status'] = [
+        'code' => "300",
+        'name' => "failure",
+        'description' => "database unavailable",
+        'returnedIn' => (microtime(true) - $executionStartTime) / 1000 . " ms"
+    ];
+    $output['data'] = [];
 
-	if (mysqli_connect_errno()) {
-		
-		$output['status']['code'] = "300";
-		$output['status']['name'] = "failure";
-		$output['status']['description'] = "database unavailable";
-		$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
-		$output['data'] = [];
+    mysqli_close($conn);
+    echo json_encode($output);
+    exit;
+}
 
-		mysqli_close($conn);
+// Determine the type of entity to retrieve
+$entityType = $_GET['entityType'] ?? 'all';  // Default to 'all' if not provided
 
-		echo json_encode($output);
+// Valid entity types
+$validEntityTypes = ['all', 'department', 'location'];
+if (!in_array($entityType, $validEntityTypes)) {
+    $output['status'] = [
+        'code' => "400",
+        'name' => "failed",
+        'description' => "Invalid entity type. Valid options are: 'all', 'department', 'location'"
+    ];
+    $output['data'] = [];
+    echo json_encode($output);
+    exit;
+}
 
-		exit;
+// Prepare query based on entity type
+switch ($entityType) {
+    case 'all':
+        // Query for all personnel with departments and locations
+        $query = 'SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location 
+                  FROM personnel p 
+                  LEFT JOIN department d ON (d.id = p.departmentID) 
+                  LEFT JOIN location l ON (l.id = d.locationID) 
+                  ORDER BY p.lastName, p.firstName, d.name, l.name';
+        break;
 
-	}	
+    case 'department':
+        // Query for all departments
+        $query = 'SELECT d.id as id, d.name as name, d.locationID as locationID, l.name AS locationName 
+                  FROM department d 
+                  LEFT JOIN location l ON d.locationID = l.id';
+        break;
 
-	// SQL does not accept parameters and so is not prepared
+    case 'location':
+        // Query for all locations
+        $query = 'SELECT id, name FROM location';
+        break;
+}
 
-	$query = 'SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location FROM personnel p LEFT JOIN department d ON (d.id = p.departmentID) LEFT JOIN location l ON (l.id = d.locationID) ORDER BY p.lastName, p.firstName, d.name, l.name';
+// Prepare the statement
+$stmt = $conn->prepare($query);
 
-	$result = $conn->query($query);
-	
-	if (!$result) {
+if (!$stmt) {
+    $output['status'] = [
+        'code' => "400",
+        'name' => "query failed",
+        'description' => "SQL statement preparation failed"
+    ];
+    $output['data'] = [];
+    mysqli_close($conn);
+    echo json_encode($output);
+    exit;
+}
 
-		$output['status']['code'] = "400";
-		$output['status']['name'] = "executed";
-		$output['status']['description'] = "query failed";	
-		$output['data'] = [];
+// Execute the statement
+$stmt->execute();
 
-		mysqli_close($conn);
+// Get the result
+$result = $stmt->get_result();
 
-		echo json_encode($output); 
+if (!$result) {
+    $output['status'] = [
+        'code' => "400",
+        'name' => "query failed",
+        'description' => "SQL query failed"
+    ];
+    $output['data'] = [];
+    mysqli_close($conn);
+    echo json_encode($output);
+    exit;
+}
 
-		exit;
+// Collect data
+$data = [];
+while ($row = $result->fetch_assoc()) {
+    $data[] = $row;  // More concise way to add to the array
+}
 
-	}
-   
-   	$data = [];
+// Prepare output
+$output['status'] = [
+    'code' => "200",
+    'name' => "ok",
+    'description' => "success",
+    'returnedIn' => (microtime(true) - $executionStartTime) / 1000 . " ms"
+];
+$output['data'] = $data;
 
-	while ($row = mysqli_fetch_assoc($result)) {
+$stmt->close();  // Close the prepared statement
+mysqli_close($conn);  // Close the database connection
 
-		array_push($data, $row);
-
-	}
-
-	$output['status']['code'] = "200";
-	$output['status']['name'] = "ok";
-	$output['status']['description'] = "success";
-	$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
-	$output['data'] = $data;
-	
-	mysqli_close($conn);
-
-	echo json_encode($output); 
+// Return JSON response
+echo json_encode($output);
 
 ?>

@@ -67,11 +67,14 @@ function showError(textStatus, errorThrown) {
   $("#errorModal").modal("show");
 }
 
-function populateSelect(url, selectId, errorModal) {
+function populateSelect(url, selectId, errorModal, entityType, optionValue) {
   $.ajax({
     url: url,
     type: "GET",
     dataType: "json",
+    data: {
+      entityType: entityType, // Specify the type for reading
+    },
     success: function (result) {
       var resultCode = result.status.code;
       if (resultCode == 200) {
@@ -84,6 +87,13 @@ function populateSelect(url, selectId, errorModal) {
             })
           );
         });
+        if (selectId === "#departmentLocation") {
+          // optional 5th parameter
+          if (optionValue) {
+            $("#departmentLocation").val(optionValue);
+          }
+          $("#departmentLoader").hide();
+        }
       } else {
         handleError(errorModal);
       }

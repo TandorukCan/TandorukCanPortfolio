@@ -108,9 +108,12 @@ function loadDepartmentsTable(refresh) {
   }
 
   $.ajax({
-    url: "./libs/php/getAllDepartments.php",
+    url: "./libs/php/getAll.php",
     type: "GET",
     dataType: "json",
+    data: {
+      entityType: "department", // Specify the type as 'department' for reading
+    },
     success: function (result) {
       var resultCode = result.status.code;
 
@@ -174,9 +177,12 @@ function loadLocationsTable(refresh) {
   }
 
   $.ajax({
-    url: "./libs/php/getAllLocations.php",
+    url: "./libs/php/getAll.php",
     type: "GET",
     dataType: "json",
+    data: {
+      entityType: "location", // Specify the type as 'location' for reading
+    },
     success: function (result) {
       var resultCode = result.status.code;
 

@@ -44,9 +44,10 @@ $(document).ready(function () {
       $("#filterButton").addClass("departmentButton");
       // add available departments as <options> to the <select> with the id of inputField
       populateSelect(
-        "./libs/php/getAllDepartments.php",
+        "./libs/php/getAll.php",
         "#inputField",
-        "#filterModal"
+        "#filterModal",
+        "department"
       );
     } else {
       // Enable the input field when other radio buttons are selected
@@ -55,9 +56,10 @@ $(document).ready(function () {
       $("#filterButton").addClass("locationButton");
       // add available locations as as <options> to the <select> with the id of inputField
       populateSelect(
-        "./libs/php/getAllLocations.php",
+        "./libs/php/getAll.php",
         "#inputField",
-        "#filterModal"
+        "#filterModal",
+        "location"
       );
     }
     // var selectedValue = $("input[name='filter']:checked").val();
@@ -138,16 +140,15 @@ $(document).ready(function () {
 
   $("#personnelModal").on("show.bs.modal", function (e) {
     if ($(e.relatedTarget).attr("data-id")) {
+      $("#personnelLoader").show();
       $("#personnelTitle").text("Edit personnel");
       $.ajax({
-        url: "./libs/php/getPersonnelByID.php",
+        url: "./libs/php/getByID.php",
         type: "POST",
         dataType: "json",
         data: {
-          // Retrieve the data-id attribute from the calling button
-          // see https://getbootstrap.com/docs/5.0/components/modal/#varying-modal-content
-          // for the non-jQuery JavaScript alternative
           id: $(e.relatedTarget).attr("data-id"),
+          entity: "personnel", // Added 'entity' to specify personnel
         },
         success: function (result) {
           var resultCode = result.status.code;
@@ -155,16 +156,13 @@ $(document).ready(function () {
           if (resultCode == 200) {
             // Update the hidden input with the employee id so that
             // it can be referenced when the form is submitted
-
+            console.log(result.data);
             $("#personnelEmployeeID").val(result.data.personnel[0].id);
 
             $("#personnelFirstName").val(result.data.personnel[0].firstName);
             $("#personnelLastName").val(result.data.personnel[0].lastName);
             $("#personnelJobTitle").val(result.data.personnel[0].jobTitle);
             $("#personnelEmailAddress").val(result.data.personnel[0].email);
-            $("#personnelDepartment").val(
-              result.data.personnel[0].departmentID
-            );
             $("#personnelDepartment").html("");
 
             $.each(result.data.department, function () {
@@ -175,6 +173,10 @@ $(document).ready(function () {
                 })
               );
             });
+            $("#personnelDepartment").val(
+              result.data.personnel[0].departmentID
+            );
+            $("#personnelLoader").hide();
           } else {
             handleError("#personnelModal");
           }
@@ -192,9 +194,10 @@ $(document).ready(function () {
       $("#personnelEmailAddress").val("");
       // will do an ajax request to retrieve all departments
       populateSelect(
-        "./libs/php/getAllDepartments.php",
+        "./libs/php/getAll.php",
         "#personnelDepartment",
-        "#personnelModal"
+        "#personnelModal",
+        "department"
       );
     }
   });
@@ -209,6 +212,7 @@ $(document).ready(function () {
     // Gather form data into an object
     if ($("#personnelEmployeeID").val()) {
       var formData = {
+        updateType: "personnel", // Specify the type as 'personnel' for update
         id: $("#personnelEmployeeID").val(),
         firstName: capitalizeFirstLetter(
           $("#personnelFirstName").val().trim().toLowerCase()
@@ -234,7 +238,7 @@ $(document).ready(function () {
       // AJAX call to save form data
 
       $.ajax({
-        url: "./libs/php/updatePersonnel.php", // PHP file to handle updating
+        url: "./libs/php/update.php", // PHP file to handle updating
         type: "POST",
         dataType: "json",
         data: formData,
@@ -249,7 +253,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -258,6 +262,7 @@ $(document).ready(function () {
       });
     } else {
       var formData = {
+        type: "personnel", // Specify the type as 'personnel' for insertion
         firstName: capitalizeFirstLetter(
           $("#personnelFirstName").val().trim().toLowerCase()
         ), // Trimming, converting to lowercase, then capitalizing the first letter
@@ -280,7 +285,7 @@ $(document).ready(function () {
       }
 
       $.ajax({
-        url: "./libs/php/insertPersonnel.php",
+        url: "./libs/php/insert.php",
         type: "POST",
         dataType: "json",
         data: formData,
@@ -297,7 +302,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -308,31 +313,39 @@ $(document).ready(function () {
   });
 
   $("#departmentModal").on("show.bs.modal", function (e) {
-    // getAllLocations.php is called to populate location select
-    populateSelect(
-      "./libs/php/getAllLocations.php",
-      "#departmentLocation",
-      "#departmentModal"
-    );
+    // getAll.php is called to populate location select
 
     if ($(e.relatedTarget).attr("data-id")) {
       $("#departmentTitle").text("Edit department");
+      $("#departmentLoader").show();
       $.ajax({
-        url: "./libs/php/getDepartmentByID.php",
+        url: "./libs/php/getByID.php",
         type: "POST",
         dataType: "json",
         data: {
           id: $(e.relatedTarget).attr("data-id"),
+          entity: "department", // Added 'entity' to specify department
         },
         success: function (result) {
           var resultCode = result.status.code;
 
           if (resultCode == 200) {
-            // Update the hidden input with the employee id so that
+            // Ensure result.data.department exists and is not an array
+            var departmentData =
+              result.data.department[0] || result.data.department;
+
+            // Update the hidden input with the department id so that
             // it can be referenced when the form is submitted
-            $("#departmentID").val(result.data[0].id);
-            $("#departmentName").val(result.data[0].name);
-            $("#departmentLocation").val(result.data[0].locationID);
+            $("#departmentID").val(departmentData.id);
+            $("#departmentName").val(departmentData.name);
+
+            populateSelect(
+              "./libs/php/getAll.php",
+              "#departmentLocation",
+              "#departmentModal",
+              "location",
+              departmentData.locationID
+            );
           } else {
             handleError("#departmentModal");
           }
@@ -345,6 +358,12 @@ $(document).ready(function () {
       $("#departmentTitle").text("Add department");
       $("#departmentID").val("");
       $("#departmentName").val("");
+      populateSelect(
+        "./libs/php/getAll.php",
+        "#departmentLocation",
+        "#departmentModal",
+        "location"
+      );
     }
   });
 
@@ -357,6 +376,7 @@ $(document).ready(function () {
 
     if ($("#departmentID").val()) {
       var formData = {
+        updateType: "department", // Specify the type as 'department' for update,
         id: $("#departmentID").val(),
         name: capitalizeFirstLetter(
           $("#departmentName").val().trim().toLowerCase()
@@ -374,7 +394,7 @@ $(document).ready(function () {
 
       // AJAX call to save form data
       $.ajax({
-        url: "./libs/php/updateDepartment.php",
+        url: "./libs/php/update.php",
         type: "POST",
         dataType: "json",
         data: formData,
@@ -390,7 +410,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -399,6 +419,7 @@ $(document).ready(function () {
       });
     } else {
       var formData = {
+        type: "department", // Specify the type as 'department' for insertion
         name: capitalizeFirstLetter(
           $("#departmentName").val().trim().toLowerCase()
         ),
@@ -414,7 +435,7 @@ $(document).ready(function () {
       }
 
       $.ajax({
-        url: "./libs/php/insertDepartment.php",
+        url: "./libs/php/insert.php",
         type: "POST",
         dataType: "json",
         data: formData,
@@ -429,7 +450,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -444,24 +465,23 @@ $(document).ready(function () {
     if ($(e.relatedTarget).attr("data-id")) {
       $("#locationTitle").text("Edit location");
       $.ajax({
-        url: "./libs/php/getLocationByID.php",
+        url: "./libs/php/getByID.php",
         type: "POST",
         dataType: "json",
         data: {
-          // Retrieve the data-id attribute from the calling button
-          // see https://getbootstrap.com/docs/5.0/components/modal/#varying-modal-content
-          // for the non-jQuery JavaScript alternative
           id: $(e.relatedTarget).attr("data-id"),
+          entity: "location", // Added 'entity' to specify location
         },
         success: function (result) {
           var resultCode = result.status.code;
 
           if (resultCode == 200) {
-            // Update the hidden input with the employee id so that
-            // it can be referenced when the form is submitted
+            // Ensure result.data.location exists and is not an array
+            var locationData = result.data.location[0] || result.data.location;
 
-            $("#locationID").val(result.data[0].id);
-            $("#locationName").val(result.data[0].name);
+            // Update the hidden input with the location id
+            $("#locationID").val(locationData.id);
+            $("#locationName").val(locationData.name);
           } else {
             handleError("#locationModal");
           }
@@ -486,6 +506,7 @@ $(document).ready(function () {
 
     if ($("#locationID").val()) {
       var formData = {
+        updateType: "location", // Specify the type as 'location' for update,
         id: $("#locationID").val(),
         name: capitalizeFirstLetter(
           $("#locationName").val().trim().toLowerCase()
@@ -501,7 +522,7 @@ $(document).ready(function () {
       }
       // AJAX call to save form data
       $.ajax({
-        url: "./libs/php/updateLocation.php",
+        url: "./libs/php/update.php",
         type: "POST",
         dataType: "json",
         data: formData,
@@ -518,7 +539,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -527,6 +548,7 @@ $(document).ready(function () {
       });
     } else {
       var formData = {
+        type: "location", // Specify the type as 'location' for insertion
         name: capitalizeFirstLetter(
           $("#locationName").val().trim().toLowerCase()
         ),
@@ -541,7 +563,7 @@ $(document).ready(function () {
       }
 
       $.ajax({
-        url: "./libs/php/insertLocation.php",
+        url: "./libs/php/insert.php",
         type: "POST",
         dataType: "json",
         data: formData,
@@ -556,7 +578,7 @@ $(document).ready(function () {
             loadLocationsTable();
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -587,10 +609,13 @@ $(document).ready(function () {
 
       // Proceed with AJAX call to delete personnel
       $.ajax({
-        url: "./libs/php/deletePersonnelByID.php",
+        url: "./libs/php/delete.php",
         type: "POST",
         dataType: "json",
-        data: { id: personnelId }, // Send personnel ID to be deleted
+        data: {
+          id: personnelId, // Send personnel ID to be deleted
+          type: "personnel", // Specify the type as 'personnel' for deletion
+        },
         success: function (response) {
           if (response.status.code == 200) {
             $("#successModal .modal-body").text(
@@ -601,7 +626,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -635,10 +660,13 @@ $(document).ready(function () {
       var departmentId = $(this).data("id");
       // Proceed with AJAX call to delete department
       $.ajax({
-        url: "./libs/php/deleteDepartmentByID.php", // Replace with the correct PHP file
+        url: "./libs/php/delete.php", // Replace with the correct PHP file
         type: "POST",
         dataType: "json",
-        data: { id: departmentId }, // Send personnel ID to be deleted
+        data: {
+          id: departmentId, // Send department ID to be deleted
+          type: "department", // Specify the type as 'department' for deletion
+        },
         success: function (response) {
           if (response.status.code == 200) {
             $("#successModal .modal-body").text(
@@ -650,7 +678,7 @@ $(document).ready(function () {
             // Optionally refresh personnel list or update the UI
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -680,10 +708,13 @@ $(document).ready(function () {
       var locationId = $(this).data("id");
       // Proceed with AJAX call to delete location
       $.ajax({
-        url: "./libs/php/deleteLocationByID.php", // Replace with the correct PHP file
+        url: "./libs/php/delete.php", // Replace with the correct PHP file
         type: "POST",
         dataType: "json",
-        data: { id: locationId }, // Send personnel ID to be deleted
+        data: {
+          id: locationId, // Send location ID to be deleted
+          type: "location", // Specify the type as 'location' for deletion
+        },
         success: function (response) {
           if (response.status.code == 200) {
             // Optionally refresh personnel list or update the UI
@@ -696,7 +727,7 @@ $(document).ready(function () {
             loadPersonnelTable("refresh");
           } else {
             // Show error modal with message
-            showError(response.status.message);
+            showError(response.status.description);
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
