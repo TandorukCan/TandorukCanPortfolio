@@ -89,7 +89,14 @@ function populateSelect(url, selectId, errorModal, entityType, optionValue) {
         });
         if (selectId === "#departmentLocation") {
           // optional 5th parameter
-          if (optionValue) {
+          let locationIdExists = false;
+          $.each(result.data, function () {
+            if (this.id == optionValue) {
+              locationIdExists = true;
+              return;
+            }
+          });
+          if (locationIdExists) {
             $("#departmentLocation").val(optionValue);
           }
           $("#departmentLoader").hide();

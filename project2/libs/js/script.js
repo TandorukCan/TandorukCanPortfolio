@@ -173,9 +173,18 @@ $(document).ready(function () {
                 })
               );
             });
-            $("#personnelDepartment").val(
-              result.data.personnel[0].departmentID
-            );
+            let departmentIdExists = false;
+            $.each(result.data.department, function () {
+              if (this.id == result.data.personnel[0].departmentID) {
+                departmentIdExists = true;
+                return;
+              }
+            });
+            if (departmentIdExists) {
+              $("#personnelDepartment").val(
+                result.data.personnel[0].departmentID
+              );
+            }
             $("#personnelLoader").hide();
           } else {
             handleError("#personnelModal");
