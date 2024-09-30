@@ -140,7 +140,7 @@ $(document).ready(function () {
 
   $("#personnelModal").on("show.bs.modal", function (e) {
     if ($(e.relatedTarget).attr("data-id")) {
-      $("#personnelLoader").show();
+      $("#personnelEditLoader").show();
       $("#personnelTitle").text("Edit personnel");
       $.ajax({
         url: "./libs/php/getByID.php",
@@ -185,7 +185,7 @@ $(document).ready(function () {
                 result.data.personnel[0].departmentID
               );
             }
-            $("#personnelLoader").hide();
+            $("#personnelEditLoader").hide();
           } else {
             handleError("#personnelModal");
           }
@@ -326,7 +326,7 @@ $(document).ready(function () {
 
     if ($(e.relatedTarget).attr("data-id")) {
       $("#departmentTitle").text("Edit department");
-      $("#departmentLoader").show();
+      $("#departmentEditLoader").show();
       $.ajax({
         url: "./libs/php/getByID.php",
         type: "POST",
@@ -472,6 +472,7 @@ $(document).ready(function () {
 
   $("#locationModal").on("show.bs.modal", function (e) {
     if ($(e.relatedTarget).attr("data-id")) {
+      $("#locationEditLoader").show();
       $("#locationTitle").text("Edit location");
       $.ajax({
         url: "./libs/php/getByID.php",
@@ -491,6 +492,7 @@ $(document).ready(function () {
             // Update the hidden input with the location id
             $("#locationID").val(locationData.id);
             $("#locationName").val(locationData.name);
+            $("#locationEditLoader").hide();
           } else {
             handleError("#locationModal");
           }

@@ -99,7 +99,7 @@ function populateSelect(url, selectId, errorModal, entityType, optionValue) {
           if (locationIdExists) {
             $("#departmentLocation").val(optionValue);
           }
-          $("#departmentLoader").hide();
+          $("#departmentEditLoader").hide();
         }
       } else {
         handleError(errorModal);
