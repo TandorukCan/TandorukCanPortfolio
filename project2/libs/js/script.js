@@ -208,6 +208,7 @@ $(document).ready(function () {
         "#personnelModal",
         "department"
       );
+      $("#personnelEditLoader").hide();
     }
   });
 
@@ -505,6 +506,7 @@ $(document).ready(function () {
       $("#locationTitle").text("Add location");
       $("#locationName").val("");
       $("#locationID").val("");
+      $("#locationEditLoader").hide();
     }
   });
 
