@@ -1,68 +1,217 @@
-function populateTable(data) {
-  $.each(data, function (index, person) {
-    $("#personnelTableBody").append(`
-      <tr>
-        <td class="align-middle text-wrap d-md-table-cell">${
-          person.lastName
-        }, ${person.firstName}</td>
-        <td class="align-middle text-nowrap d-lg-table-cell d-none">${
-          person.jobTitle
-        }</td>
-        <td class="align-middle text-wrap d-md-table-cell">${
-          person.department ? person.department : "has not been assigned"
-        }</td>
-        <td class="align-middle text-wrap d-md-table-cell"> ${
-          person.location ? person.location : "has not been assigned"
-        }</td>
-        <td class="align-middle text-nowrap d-lg-table-cell d-none">${
-          person.email
-        }</td>
-        <td class="align-middle text-wrap d-md-table-cell">
-          <button
-            type="button"
-            class="btn btn-primary btn-sm"
-            data-bs-toggle="modal"
-            data-bs-target="#personnelModal"
-            data-id="${person.id}"
-          >
-            <i class="fa-solid fa-pencil fa-fw"></i>
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary btn-sm"
-            id="deletePersonnelButton"
-            data-id="${person.id}"
-          >
-            <i class="fa-solid fa-trash fa-fw"></i>
-          </button>
-        </td>
-      </tr>
-  `);
+import { handleError, showError, populateSelect } from "./helperFunctions.js";
+
+function populatePersonnelTable(data) {
+  var frag = document.createDocumentFragment();
+
+  data.forEach(function (item, index) {
+    var row = document.createElement("tr");
+
+    var name = document.createElement("td");
+    var firstName = document.createTextNode(item.firstName);
+    var lastName = document.createTextNode(item.lastName);
+    var comma = document.createTextNode(", ");
+    name.append(lastName);
+    name.append(comma);
+    name.append(firstName);
+    name.setAttribute("class", "align-middle text-wrap d-md-table-cell");
+    row.append(name);
+
+    var jobTitle = document.createElement("td");
+    var jobText = document.createTextNode(item.jobTitle);
+    jobTitle.setAttribute(
+      "class",
+      "align-middle text-nowrap d-lg-table-cell d-none"
+    );
+    jobTitle.append(jobText);
+
+    row.append(jobTitle);
+
+    var department = document.createElement("td");
+    var departmentText = document.createTextNode(item.department);
+    department.append(departmentText);
+    department.setAttribute("class", "align-middle text-wrap d-md-table-cell");
+
+    row.append(department);
+
+    var location = document.createElement("td");
+    var locationText = document.createTextNode(item.location);
+    location.setAttribute("class", "align-middle text-wrap d-md-table-cell");
+    location.append(locationText);
+
+    row.append(location);
+
+    var email = document.createElement("td");
+    var emailText = document.createTextNode(item.email);
+    email.setAttribute(
+      "class",
+      "align-middle text-nowrap d-lg-table-cell d-none"
+    );
+    email.append(emailText);
+
+    row.append(email);
+
+    var buttonContainer = document.createElement("td");
+    buttonContainer.setAttribute(
+      "class",
+      "align-middle text-wrap d-md-table-cell"
+    );
+
+    var edtBtn = document.createElement("button");
+    edtBtn.setAttribute("type", "button");
+    edtBtn.setAttribute("class", "btn btn-primary btn-sm");
+    edtBtn.setAttribute("data-bs-toggle", "modal");
+    edtBtn.setAttribute("data-bs-target", "#editPersonnelModal");
+    edtBtn.setAttribute("data-id", item.id);
+
+    var edtIcon = document.createElement("i");
+    edtIcon.setAttribute("class", "fa-solid fa-pencil fa-fw");
+    edtBtn.append(edtIcon);
+
+    var dltBtn = document.createElement("button");
+    dltBtn.setAttribute("type", "button");
+    dltBtn.setAttribute("class", "btn btn-primary btn-sm deletePersonnelBtn");
+    dltBtn.setAttribute("data-bs-toggle", "modal");
+    dltBtn.setAttribute("data-bs-target", "#deletePersonnelModal");
+    dltBtn.setAttribute("data-id", item.id);
+
+    var dltIcon = document.createElement("i");
+    dltIcon.setAttribute("class", "fa-solid fa-trash fa-fw");
+    dltBtn.append(dltIcon);
+
+    buttonContainer.append(edtBtn);
+    buttonContainer.append(dltBtn);
+
+    row.append(buttonContainer);
+
+    frag.append(row);
   });
+
+  $("#personnelTableBody").append(frag);
+
+  if ($("#filterPersonnelByDepartment").val() > 0) {
+    var filterText = $("#filterPersonnelByDepartment option:selected").text();
+    filterTable(filterText, "department");
+  }
+  if ($("#filterPersonnelByLocation").val() > 0) {
+    var filterText = $("#filterPersonnelByLocation option:selected").text();
+    filterTable(filterText, "location");
+  }
+  $("#personnelLoader").hide();
 }
 
-function loadPersonnelTable(searchTerm) {
-  if (searchTerm || searchTerm === "refresh") {
-    if (searchTerm === "refresh") {
-      $("#searchInp").val("");
-      resetFilterTable();
-    }
-    $("#personnelTableBody")
-      .empty()
-      .append(`<div id="personnelLoader" style="display: none;"></div>`);
+function populateDepartmentTable(data) {
+  var frag = document.createDocumentFragment();
+  data.forEach(function (item, index) {
+    var row = document.createElement("tr");
 
-    if (!$("#mainLoader").is(":visible")) {
-      $("#personnelLoader").show();
-    }
-  } else {
-    $("#crudLoader").show();
-    $("#personnelTableBody").empty();
+    var department = document.createElement("td");
+    var departmentName = document.createTextNode(item.name);
+    department.append(departmentName);
+    department.setAttribute("class", "align-middle text-wrap");
+    row.append(department);
+
+    var location = document.createElement("td");
+    var locationName = document.createTextNode(item.locationName);
+    location.setAttribute("class", "align-middle text-wrap d-md-table-cell");
+    location.append(locationName);
+    row.append(location);
+
+    var buttonContainer = document.createElement("td");
+    buttonContainer.setAttribute("class", "align-middle text-end text-nowrap");
+
+    var edtBtn = document.createElement("button");
+    edtBtn.setAttribute("type", "button");
+    edtBtn.setAttribute("class", "btn btn-primary btn-sm");
+    edtBtn.setAttribute("data-bs-toggle", "modal");
+    edtBtn.setAttribute("data-bs-target", "#editDepartmentModal");
+    edtBtn.setAttribute("data-id", item.id);
+
+    var edtIcon = document.createElement("i");
+    edtIcon.setAttribute("class", "fa-solid fa-pencil fa-fw");
+    edtBtn.append(edtIcon);
+
+    var dltBtn = document.createElement("button");
+    dltBtn.setAttribute("type", "button");
+    dltBtn.setAttribute("class", "btn btn-primary btn-sm deleteDepartmentBtn");
+    dltBtn.setAttribute("data-id", item.id);
+
+    var dltIcon = document.createElement("i");
+    dltIcon.setAttribute("class", "fa-solid fa-trash fa-fw");
+    dltBtn.append(dltIcon);
+
+    buttonContainer.append(edtBtn);
+    buttonContainer.append(dltBtn);
+
+    row.append(buttonContainer);
+
+    frag.append(row);
+  });
+  $("#departmentTableBody").append(frag);
+  $("#departmentLoader").hide();
+}
+
+function populateLocationTable(data) {
+  var frag = document.createDocumentFragment();
+
+  data.forEach(function (item, index) {
+    var row = document.createElement("tr");
+
+    var location = document.createElement("td");
+    var locationName = document.createTextNode(item.name);
+    location.append(locationName);
+    location.setAttribute("class", "align-middle text-nowrap");
+    row.append(location);
+
+    var buttonContainer = document.createElement("td");
+    buttonContainer.setAttribute("class", "align-middle text-end text-nowrap");
+
+    var edtBtn = document.createElement("button");
+    edtBtn.setAttribute("type", "button");
+    edtBtn.setAttribute("class", "btn btn-primary btn-sm");
+    edtBtn.setAttribute("data-bs-toggle", "modal");
+    edtBtn.setAttribute("data-bs-target", "#editLocationModal");
+    edtBtn.setAttribute("data-id", item.id);
+
+    var edtIcon = document.createElement("i");
+    edtIcon.setAttribute("class", "fa-solid fa-pencil fa-fw");
+    edtBtn.append(edtIcon);
+
+    var dltBtn = document.createElement("button");
+    dltBtn.setAttribute("type", "button");
+    dltBtn.setAttribute("class", "btn btn-primary btn-sm deleteLocationBtn");
+    dltBtn.setAttribute("data-id", item.id);
+
+    var dltIcon = document.createElement("i");
+    dltIcon.setAttribute("class", "fa-solid fa-trash fa-fw");
+    dltBtn.append(dltIcon);
+
+    buttonContainer.append(edtBtn);
+    buttonContainer.append(dltBtn);
+
+    row.append(buttonContainer);
+
+    frag.append(row);
+  });
+
+  $("#locationTableBody").append(frag);
+  $("#locationLoader").hide();
+}
+
+function loadPersonnelTable(searchData) {
+  if (searchData === "refresh") {
+    $("#searchInp").val("");
+  }
+  $("#personnelTableBody")
+    .empty()
+    .append(`<div id="personnelLoader" style="display: none;"></div>`);
+
+  if (!$("#mainLoader").is(":visible")) {
+    $("#personnelLoader").show();
   }
 
-  if (searchTerm && searchTerm !== "refresh") {
+  if (searchData !== "refresh") {
     // table will be populated based on search term
-    populateTable(searchTerm);
-    $("#personnelLoader").hide();
+    populatePersonnelTable(searchData);
   } else {
     $.ajax({
       url: "./libs/php/getAll.php",
@@ -74,15 +223,9 @@ function loadPersonnelTable(searchTerm) {
         if (resultCode == 200) {
           // Update the hidden input with the employee id so that
           // it can be referenced when the form is submitted
-          populateTable(result.data);
-          if (searchTerm === "refresh") {
-            if ($("#mainLoader").is(":visible")) {
-              $("#mainLoader").hide();
-            } else {
-              $("#personnelLoader").hide();
-            }
-          } else {
-            $("#crudLoader").hide();
+          populatePersonnelTable(result.data);
+          if ($("#mainLoader").is(":visible")) {
+            $("#mainLoader").hide();
           }
         } else {
           // Show error modal with message
@@ -93,143 +236,94 @@ function loadPersonnelTable(searchTerm) {
         handleError("#personnelModal", errorThrown);
       },
     });
+    populateSelect(
+      "./libs/php/getAll.php",
+      "#filterPersonnelByDepartment",
+      "#filterPersonnelModal",
+      "department"
+    );
+
+    populateSelect(
+      "./libs/php/getAll.php",
+      "#filterPersonnelByLocation",
+      "#filterPersonnelModal",
+      "location"
+    );
   }
 }
 
-function loadDepartmentsTable(refresh) {
+function loadDepartmentsTable(searchData) {
   // Clear any existing rows in the table body and add a loader
-  if (refresh) {
-    $("#departmentTableBody")
-      .empty()
-      .append(`<div id="departmentLoader"></div>`);
-  } else {
-    $("#crudLoader").show();
-    $("#departmentTableBody").empty();
+  if (searchData === "refresh") {
+    $("#searchInp").val("");
   }
+  $("#departmentTableBody").empty().append(`<div id="departmentLoader"></div>`);
 
-  $.ajax({
-    url: "./libs/php/getAll.php",
-    type: "GET",
-    dataType: "json",
-    data: {
-      entityType: "department", // Specify the type as 'department' for reading
-    },
-    success: function (result) {
-      var resultCode = result.status.code;
+  if (searchData !== "refresh") {
+    // table will be populated based on search term
+    populateDepartmentTable(searchData);
+  } else {
+    $.ajax({
+      url: "./libs/php/getAll.php",
+      type: "GET",
+      dataType: "json",
+      data: {
+        entityType: "department", // Specify the type as 'department' for reading
+      },
+      success: function (result) {
+        var resultCode = result.status.code;
 
-      if (resultCode == 200) {
-        // Update the hidden input with the employee id so that
-        // it can be referenced when the form is submitted
-        $.each(result.data, function (index, department) {
-          $("#departmentTableBody").append(`
-              <tr>
-              <td class="align-middle text-wrap">${department.name}</td>
-              <td class="align-middle text-wrap d-md-table-cell">${
-                department.locationName
-                  ? department.locationName
-                  : "has not been assigned"
-              }</td>
-              <td class="align-middle text-end text-nowrap">
-                <button
-                  type="button"
-                  class="btn btn-primary btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#departmentModal"
-                  data-id="${department.id}"
-                >
-                  <i class="fa-solid fa-pencil fa-fw"></i>
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary btn-sm"
-                  id="deleteDepartmentButton"
-                  data-id="${department.id}"
-                >
-                  <i class="fa-solid fa-trash fa-fw"></i>
-                </button>
-              </td>
-            </tr>
-          `);
-          if (refresh) {
-            $("#departmentLoader").hide();
-          } else {
-            $("#crudLoader").hide();
-          }
-        });
-      } else {
-        // Show error modal with message
-        showError(result.status.description);
-      }
-    },
-    error: function (jqXHR, textStatus, errorThrown) {
-      handleError("#departmentModal", errorThrown);
-    },
-  });
+        if (resultCode == 200) {
+          // Update the hidden input with the employee id so that
+          // it can be referenced when the form is submitted
+          populateDepartmentTable(result.data);
+        } else {
+          // Show error modal with message
+          showError(result.status.description);
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        handleError("#departmentModal", errorThrown);
+      },
+    });
+  }
 }
 
-function loadLocationsTable(refresh) {
+function loadLocationsTable(searchData) {
   // Clear any existing rows in the table body and add a loader
-  if (refresh) {
-    $("#locationTableBody").empty().append(`<div id="locationLoader"></div>`);
-  } else {
-    $("#crudLoader").show();
-    $("#locationTableBody").empty();
+  if (searchData === "refresh") {
+    $("#searchInp").val("");
   }
+  $("#locationTableBody").empty().append(`<div id="locationLoader"></div>`);
 
-  $.ajax({
-    url: "./libs/php/getAll.php",
-    type: "GET",
-    dataType: "json",
-    data: {
-      entityType: "location", // Specify the type as 'location' for reading
-    },
-    success: function (result) {
-      var resultCode = result.status.code;
+  if (searchData !== "refresh") {
+    // table will be populated based on search term
+    populateLocationTable(searchData);
+  } else {
+    $.ajax({
+      url: "./libs/php/getAll.php",
+      type: "GET",
+      dataType: "json",
+      data: {
+        entityType: "location", // Specify the type as 'location' for reading
+      },
+      success: function (result) {
+        var resultCode = result.status.code;
 
-      if (resultCode == 200) {
-        // Update the hidden input with the employee id so that
-        // it can be referenced when the form is submitted
-
-        $.each(result.data, function (index, location) {
-          $("#locationTableBody").append(`
-              <tr>
-              <td class="align-middle text-nowrap">${location.name}</td>
-              <td class="align-middle text-end text-nowrap">
-                <button
-                  type="button"
-                  class="btn btn-primary btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#locationModal"
-                  data-id="${location.id}"
-                >
-                  <i class="fa-solid fa-pencil fa-fw"></i>
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary btn-sm"
-                  id="deleteLocationButton"
-                  data-id="${location.id}"
-                >
-                  <i class="fa-solid fa-trash fa-fw"></i>
-                </button>
-              </td>
-            </tr>
-          `);
-          if (refresh) {
-            $("#locationLoader").hide();
-          } else {
-            $("#crudLoader").hide();
-          }
-        });
-      } else {
-        // Show error modal with message
-        showError(result.status.description);
-      }
-    },
-    error: function (jqXHR, textStatus, errorThrown) {
-      handleError("#locationModal", errorThrown);
-    },
-  });
+        if (resultCode == 200) {
+          // Update the hidden input with the employee id so that
+          // it can be referenced when the form is submitted
+          populateLocationTable(result.data);
+        } else {
+          // Show error modal with message
+          showError(result.status.description);
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        handleError("#locationModal", errorThrown);
+      },
+    });
+  }
 }
 
 //write a code to reset the fields in filter modal when it's class is equal to "modal fade" instead of "modal fade show"
@@ -253,7 +347,6 @@ function filterTable(input, option) {
     } else {
       // Get the text of the third <td> (index 2)
       var rowDepartment = $(this).find("td:eq(2)").text().trim();
-
       // Check if the location matches
       if (rowDepartment === input) {
         // If it matches, show the row
@@ -266,21 +359,9 @@ function filterTable(input, option) {
   });
 }
 
-function resetFilterTable() {
-  $("#inputField").prop("disabled", true);
-  $("#inputField").html("");
-  $("#filterButton").removeClass("locationButton");
-  $("#filterButton").removeClass("departmentButton");
-  // Uncheck all radio buttons
-  $("input[name='filter']").prop("checked", false);
-  // Check the "Select All" radio button
-  $("#selectAll").prop("checked", true);
-}
-
 export {
   loadPersonnelTable,
   loadDepartmentsTable,
   loadLocationsTable,
   filterTable,
-  resetFilterTable,
 };

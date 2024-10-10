@@ -1,4 +1,8 @@
-import { loadPersonnelTable } from "./tableFunctions.js";
+import {
+  loadPersonnelTable,
+  loadDepartmentsTable,
+  loadLocationsTable,
+} from "./tableFunctions.js";
 
 function capitalizeFirstLetter(inputString) {
   return inputString
@@ -16,21 +20,20 @@ function debounce(func, delay) {
 }
 
 // Debounce the search function with a delay of 1000ms (1 second)
-const debouncedSearch = debounce(function () {
+const debouncedSearch = debounce(function (url, func) {
   // Get the search term
   var searchTerm = $("#searchInp").val().trim();
-
   if (searchTerm.length > 0) {
-    // Make AJAX request to searchAll.php
+    // Make AJAX request to searchInPersonnel.php
     $.ajax({
-      url: "./libs/php/searchAll.php",
+      url: url,
       type: "GET",
       dataType: "json",
       data: { txt: searchTerm },
       success: function (response) {
         if (response.status.code == 200) {
           // Update the table with the search results
-          loadPersonnelTable(response.data.found);
+          func(response.data.found);
         } else {
           // Show error modal with message
           showError(response.status.message);
@@ -41,8 +44,14 @@ const debouncedSearch = debounce(function () {
       },
     });
   } else {
-    // Clear the table if search term is empty
-    loadPersonnelTable("refresh"); // Assuming you have a function to load the full table
+    if (url == "./libs/php/searchInPersonnel.php") {
+      // Clear the table if search term is empty
+      loadPersonnelTable("refresh");
+    } else if (url == "./libs/php/searchInDepartments.php") {
+      loadDepartmentsTable("refresh");
+    } else {
+      loadLocationsTable("refresh");
+    }
   }
 }, 1500); // 1500ms delay
 
@@ -79,6 +88,17 @@ function populateSelect(url, selectId, errorModal, entityType, optionValue) {
       var resultCode = result.status.code;
       if (resultCode == 200) {
         $(selectId).html("");
+        if (
+          selectId === "#filterPersonnelByLocation" ||
+          selectId === "#filterPersonnelByDepartment"
+        ) {
+          $(selectId).append(
+            $("<option>", {
+              value: 0,
+              text: "All",
+            })
+          );
+        }
         $.each(result.data, function () {
           $(selectId).append(
             $("<option>", {
@@ -99,7 +119,7 @@ function populateSelect(url, selectId, errorModal, entityType, optionValue) {
           if (locationIdExists) {
             $("#departmentLocation").val(optionValue);
           }
-          $("#departmentEditLoader").hide();
+          // $("#departmentEditLoader").hide();
         }
       } else {
         handleError(errorModal);

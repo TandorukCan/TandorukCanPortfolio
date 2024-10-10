@@ -21,7 +21,7 @@ function checkForDuplicateEmailForUpdate(email, id) {
     const emailCell = $(this).find("td").eq(4).text().trim();
 
     // Get the data-id from the delete button in this row
-    const rowId = $(this).find("#deletePersonnelButton").data("id");
+    const rowId = $(this).find(".deletePersonnelBtn").data("id");
     // Skip this iteration if the rowId matches the provided id
     if (rowId == id) {
       return true; // Continue to the next iteration
@@ -29,7 +29,6 @@ function checkForDuplicateEmailForUpdate(email, id) {
 
     // Check if the email matches the provided parameter
     if (emailCell === email.trim()) {
-      // console.log("A user with the same email already exists");
       isDuplicate = true;
       return false; // Break out of the loop
     }
@@ -61,7 +60,7 @@ function checkDuplicateDepartmentForUpdate(department, id) {
     const departmentName = $(this).find("td").eq(0).text().trim();
 
     // Get the data-id from the delete button in this row
-    const rowId = $(this).find("#deleteDepartmentButton").data("id");
+    const rowId = $(this).find(".deleteDepartmentBtn").data("id");
     // Skip this iteration if the rowId matches the provided id
     if (rowId == id) {
       return true; // Continue to the next iteration
@@ -69,7 +68,6 @@ function checkDuplicateDepartmentForUpdate(department, id) {
 
     // Check if the email matches the provided parameter
     if (departmentName === department.trim()) {
-      // console.log("A department with the same name already exists");
       isDuplicate = true;
       return false; // Break out of the loop
     }
@@ -101,7 +99,7 @@ function checkDuplicateLocationForUpdate(location, id) {
     const locationName = $(this).find("td").eq(0).text().trim();
 
     // Get the data-id from the delete button in this row
-    const rowId = $(this).find("#deletePersonnelButton").data("id");
+    const rowId = $(this).find(".deleteLocationBtn").data("id");
     // Skip this iteration if the rowId matches the provided id
     if (rowId == id) {
       return true; // Continue to the next iteration
@@ -109,7 +107,6 @@ function checkDuplicateLocationForUpdate(location, id) {
 
     // Check if the email matches the provided parameter
     if (locationName === location.trim()) {
-      // console.log("A location with the same email already exists");
       isDuplicate = true;
       return false; // Break out of the loop
     }

@@ -58,12 +58,13 @@ switch ($entityType) {
         // Query for all departments
         $query = 'SELECT d.id as id, d.name as name, d.locationID as locationID, l.name AS locationName 
                   FROM department d 
-                  LEFT JOIN location l ON d.locationID = l.id';
+                  LEFT JOIN location l ON d.locationID = l.id
+                  ORDER BY name, locationName';
         break;
 
     case 'location':
         // Query for all locations
-        $query = 'SELECT id, name FROM location';
+        $query = 'SELECT id, name FROM location ORDER BY name';
         break;
 }
 
