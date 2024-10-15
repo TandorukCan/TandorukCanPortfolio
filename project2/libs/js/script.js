@@ -153,6 +153,11 @@ $(document).ready(function () {
     });
   });
 
+  // Reset form when modal is hidden
+  $("#editPersonnelModal").on("hidden.bs.modal", function () {
+    $("#editPersonnelForm")[0].reset();
+  });
+
   // Executes when the form button with type="submit" is clicked
   $("#editPersonnelForm").on("submit", function (e) {
     // Executes when the form button with type="submit" is clicked
@@ -212,11 +217,6 @@ $(document).ready(function () {
   });
 
   $("#addPersonnelModal").on("show.bs.modal", function () {
-    $("#addPersonnelEmployeeID").val("");
-    $("#addPersonnelFirstName").val("");
-    $("#addPersonnelLastName").val("");
-    $("#addPersonnelJobTitle").val("");
-    $("#addPersonnelEmailAddress").val("");
     // will do an ajax request to retrieve all departments
     populateSelect(
       "./libs/php/getAll.php",
@@ -224,6 +224,10 @@ $(document).ready(function () {
       "#addPersonnelModal",
       "department"
     );
+  });
+
+  $("#addPersonnelModal").on("hidden.bs.modal", function () {
+    $("#addPersonnelForm")[0].reset();
   });
 
   $("#addPersonnelForm").on("submit", function (e) {
@@ -280,7 +284,6 @@ $(document).ready(function () {
 
   $("#editDepartmentModal").on("show.bs.modal", function (e) {
     // getAll.php is called to populate location select
-    $("#editDepartmentTitle").text("Edit department");
     $.ajax({
       url: "./libs/php/getByID.php",
       type: "POST",
@@ -317,6 +320,10 @@ $(document).ready(function () {
         handleError("#editDepartmentModal", errorThrown);
       },
     });
+  });
+
+  $("#editDepartmentModal").on("hidden.bs.modal", function () {
+    $("#editDepartmentForm")[0].reset();
   });
 
   $("#editDepartmentForm").on("submit", function (e) {
@@ -370,14 +377,17 @@ $(document).ready(function () {
 
   $("#addDepartmentModal").on("show.bs.modal", function (e) {
     // getAll.php is called to populate location select
-    $("#addDepartmentTitle").text("Add department");
-    $("#addDepartmentName").val("");
+    // $("#addDepartmentName").val("");
     populateSelect(
       "./libs/php/getAll.php",
       "#addDepartmentLocation",
       "#addDepartmentModal",
       "location"
     );
+  });
+
+  $("#addDepartmentModal").on("hidden.bs.modal", function () {
+    $("#addDepartmentForm")[0].reset();
   });
 
   $("#addDepartmentForm").on("submit", function (e) {
@@ -455,6 +465,10 @@ $(document).ready(function () {
         handleError("#editLocationModal", errorThrown);
       },
     });
+  });
+
+  $("#editLocationModal").on("hidden.bs.modal", function () {
+    $("#editLocationForm")[0].reset();
   });
 
   $("#editLocationForm").on("submit", function (e) {
@@ -574,6 +588,12 @@ $(document).ready(function () {
         showError(textStatus, errorThrown);
       },
     });
+  });
+
+  $("#deletePersonnelModal").on("hidden.bs.modal", function () {
+    // Clear hidden input and confirmation text
+    $("#deletePersonnelForm")[0].reset();
+    $("#areYouSurePersonnelName").text("");
   });
 
   // Handle the actual delete action when the modal's confirm button is clicked
