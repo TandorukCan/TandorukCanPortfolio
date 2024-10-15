@@ -1,4 +1,4 @@
-import { handleError, showError, populateSelect } from "./helperFunctions.js";
+import { handleError, showError } from "./helperFunctions.js";
 
 function populatePersonnelTable(data) {
   var frag = document.createDocumentFragment();
@@ -87,15 +87,6 @@ function populatePersonnelTable(data) {
   });
 
   $("#personnelTableBody").append(frag);
-
-  if ($("#filterPersonnelByDepartment").val() > 0) {
-    var filterText = $("#filterPersonnelByDepartment option:selected").text();
-    filterTable(filterText, "department");
-  }
-  if ($("#filterPersonnelByLocation").val() > 0) {
-    var filterText = $("#filterPersonnelByLocation option:selected").text();
-    filterTable(filterText, "location");
-  }
   $("#personnelLoader").hide();
 }
 
@@ -197,61 +188,6 @@ function populateLocationTable(data) {
   $("#locationLoader").hide();
 }
 
-function loadPersonnelTable(searchData) {
-  if (searchData === "refresh") {
-    $("#searchInp").val("");
-  }
-  $("#personnelTableBody")
-    .empty()
-    .append(`<div id="personnelLoader" style="display: none;"></div>`);
-
-  if (!$("#mainLoader").is(":visible")) {
-    $("#personnelLoader").show();
-  }
-
-  if (searchData !== "refresh") {
-    // table will be populated based on search term
-    populatePersonnelTable(searchData);
-  } else {
-    $.ajax({
-      url: "./libs/php/getAll.php",
-      type: "GET",
-      dataType: "json",
-      success: function (result) {
-        var resultCode = result.status.code;
-
-        if (resultCode == 200) {
-          // Update the hidden input with the employee id so that
-          // it can be referenced when the form is submitted
-          populatePersonnelTable(result.data);
-          if ($("#mainLoader").is(":visible")) {
-            $("#mainLoader").hide();
-          }
-        } else {
-          // Show error modal with message
-          showError(result.status.description);
-        }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        handleError("#personnelModal", errorThrown);
-      },
-    });
-    populateSelect(
-      "./libs/php/getAll.php",
-      "#filterPersonnelByDepartment",
-      "#filterPersonnelModal",
-      "department"
-    );
-
-    populateSelect(
-      "./libs/php/getAll.php",
-      "#filterPersonnelByLocation",
-      "#filterPersonnelModal",
-      "location"
-    );
-  }
-}
-
 function loadDepartmentsTable(searchData) {
   // Clear any existing rows in the table body and add a loader
   if (searchData === "refresh") {
@@ -328,40 +264,41 @@ function loadLocationsTable(searchData) {
 
 //write a code to reset the fields in filter modal when it's class is equal to "modal fade" instead of "modal fade show"
 function filterTable(input, option) {
-  $("#personnelTableBody tr").each(function () {
-    // If the location is "Select All", show all rows
-    if (option === "showEverything") {
-      $(this).show();
-    } else if (option === "location") {
-      // Get the text of the third <td> (index 2)
-      var rowLocation = $(this).find("td:eq(3)").text().trim();
+  // If the location is "Select All", show all rows
+  $("#personnelTableBody")
+    .empty()
+    .append(`<div id="personnelLoader" style="display: none;"></div>`);
+  $("#personnelLoader").show();
+  // var searchTerm = $("#searchInp").val().trim();
+  let data = {
+    txt: $("#searchInp").val().trim(),
+    filter: option, // 'all', 'department', or 'location'
+    input: input,
+  };
 
-      // Check if the location matches
-      if (rowLocation === input) {
-        // If it matches, show the row
-        $(this).show();
+  $.ajax({
+    url: "./libs/php/searchInPersonnel.php",
+    type: "GET",
+    dataType: "json",
+    data: data,
+    success: function (response) {
+      if (response.status.code == 200) {
+        // Update the table with the search results
+        populatePersonnelTable(response.data.found);
       } else {
-        // If it doesn't match, hide the row
-        $(this).hide();
+        // Show error modal with message
+        showError(response.status.message);
       }
-    } else {
-      // Get the text of the third <td> (index 2)
-      var rowDepartment = $(this).find("td:eq(2)").text().trim();
-      // Check if the location matches
-      if (rowDepartment === input) {
-        // If it matches, show the row
-        $(this).show();
-      } else {
-        // If it doesn't match, hide the row
-        $(this).hide();
-      }
-    }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      showError(textStatus, errorThrown);
+    },
   });
 }
 
 export {
-  loadPersonnelTable,
   loadDepartmentsTable,
   loadLocationsTable,
   filterTable,
+  populatePersonnelTable,
 };

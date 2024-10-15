@@ -1,5 +1,5 @@
 import {
-  loadPersonnelTable,
+  populatePersonnelTable,
   loadDepartmentsTable,
   loadLocationsTable,
   filterTable,
@@ -22,30 +22,23 @@ import {
   populateSelect,
 } from "./utils/helperFunctions.js";
 
+let filter = "All";
+
 $(document).ready(function () {
   // Call the function to load the personnel table when the page loads
+
   loadPersonnelTable("refresh");
-
-  populateSelect(
-    "./libs/php/getAll.php",
-    "#filterPersonnelByDepartment",
-    "#filterPersonnelModal",
-    "department"
-  );
-
-  populateSelect(
-    "./libs/php/getAll.php",
-    "#filterPersonnelByLocation",
-    "#filterPersonnelModal",
-    "location"
-  );
 
   $("#searchInp").on("keyup", function () {
     if ($("#personnelBtn").hasClass("active")) {
       // Show the loader
       $("#personnelLoader").show();
       // Call the debounced search function
-      debouncedSearch("./libs/php/searchInPersonnel.php", loadPersonnelTable);
+      debouncedSearch(
+        "./libs/php/searchInPersonnel.php",
+        loadPersonnelTable,
+        filter
+      );
     } else if ($("#departmentsBtn").hasClass("active")) {
       // Show the loader
       $("#departmentLoader").show();
@@ -741,30 +734,84 @@ $(document).ready(function () {
   });
 
   $("#filterPersonnelByDepartment").change(function () {
-    filterTable("All", "showEverything");
     if (this.value > 0) {
       $("#filterPersonnelByLocation").val(0);
-
-      // apply Filter
     }
     var filterText = $("#filterPersonnelByDepartment option:selected").text();
     if (filterText === "All") {
-      filterTable(filterText, "showEverything");
+      filterTable(filterText, "All");
+      filter = "All";
     } else {
       filterTable(filterText, "department");
+      filter = "department";
     }
   });
 
   $("#filterPersonnelByLocation").change(function () {
-    filterTable("All", "showEverything");
     if (this.value > 0) {
       $("#filterPersonnelByDepartment").val(0);
     }
     var filterText = $("#filterPersonnelByLocation option:selected").text();
     if (filterText === "All") {
-      filterTable(filterText, "showEverything");
+      filterTable(filterText, "All");
+      filter = "All";
     } else {
       filterTable(filterText, "location");
+      filter = "location";
     }
   });
 });
+function loadPersonnelTable(searchData) {
+  $("#personnelTableBody")
+    .empty()
+    .append(`<div id="personnelLoader" style="display: none;"></div>`);
+
+  if (!$("#mainLoader").is(":visible")) {
+    $("#personnelLoader").show();
+  }
+
+  if (searchData === "refresh") {
+    $("#searchInp").val("");
+    $.ajax({
+      url: "./libs/php/getAll.php",
+      type: "GET",
+      dataType: "json",
+      success: function (result) {
+        var resultCode = result.status.code;
+
+        if (resultCode == 200) {
+          // Update the hidden input with the employee id so that
+          // it can be referenced when the form is submitted
+          populatePersonnelTable(result.data);
+          if ($("#mainLoader").is(":visible")) {
+            $("#mainLoader").hide();
+          }
+        } else {
+          // Show error modal with message
+          showError(result.status.description);
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        handleError("#personnelModal", errorThrown);
+      },
+    });
+    populateSelect(
+      "./libs/php/getAll.php",
+      "#filterPersonnelByDepartment",
+      "#filterPersonnelModal",
+      "department"
+    );
+
+    populateSelect(
+      "./libs/php/getAll.php",
+      "#filterPersonnelByLocation",
+      "#filterPersonnelModal",
+      "location"
+    );
+    filter = "All";
+  } else {
+    populatePersonnelTable(searchData);
+  }
+}
+
+export { loadPersonnelTable };

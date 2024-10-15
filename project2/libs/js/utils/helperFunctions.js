@@ -1,9 +1,3 @@
-import {
-  loadPersonnelTable,
-  loadDepartmentsTable,
-  loadLocationsTable,
-} from "./tableFunctions.js";
-
 function capitalizeFirstLetter(inputString) {
   return inputString
     .split(" ") // Split the string into an array of words
@@ -20,39 +14,45 @@ function debounce(func, delay) {
 }
 
 // Debounce the search function with a delay of 1000ms (1 second)
-const debouncedSearch = debounce(function (url, func) {
-  // Get the search term
+const debouncedSearch = debounce(function (url, func, filter) {
   var searchTerm = $("#searchInp").val().trim();
-  if (searchTerm.length > 0) {
-    // Make AJAX request to searchInPersonnel.php
-    $.ajax({
-      url: url,
-      type: "GET",
-      dataType: "json",
-      data: { txt: searchTerm },
-      success: function (response) {
-        if (response.status.code == 200) {
-          // Update the table with the search results
-          func(response.data.found);
-        } else {
-          // Show error modal with message
-          showError(response.status.message);
-        }
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        showError(textStatus, errorThrown);
-      },
-    });
-  } else {
-    if (url == "./libs/php/searchInPersonnel.php") {
-      // Clear the table if search term is empty
-      loadPersonnelTable("refresh");
-    } else if (url == "./libs/php/searchInDepartments.php") {
-      loadDepartmentsTable("refresh");
-    } else {
-      loadLocationsTable("refresh");
+  let data;
+  if (filter) {
+    data = {
+      txt: $("#searchInp").val().trim(),
+      filter: filter, // 'All', 'department', or 'location'
+    };
+
+    if (filter === "department") {
+      data.input = $("#filterPersonnelByDepartment option:selected").text();
+    } else if (filter === "location") {
+      data.input = $("#filterPersonnelByLocation option:selected").text();
     }
+  } else {
+    data = {
+      txt: $("#searchInp").val().trim(),
+    };
   }
+  // Get the search term
+
+  $.ajax({
+    url: url,
+    type: "GET",
+    dataType: "json",
+    data: data,
+    success: function (response) {
+      if (response.status.code == 200) {
+        // Update the table with the search results
+        func(response.data.found);
+      } else {
+        // Show error modal with message
+        showError(response.status.message);
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      showError(textStatus, errorThrown);
+    },
+  });
 }, 1500); // 1500ms delay
 
 function handleError(modalTitle, errorThrown) {
@@ -119,7 +119,6 @@ function populateSelect(url, selectId, errorModal, entityType, optionValue) {
           if (locationIdExists) {
             $("#departmentLocation").val(optionValue);
           }
-          // $("#departmentEditLoader").hide();
         }
       } else {
         handleError(errorModal);

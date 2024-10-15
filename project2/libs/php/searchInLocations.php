@@ -35,7 +35,7 @@
 	// first query - SQL statement accepts parameters and so is prepared to avoid SQL injection.
 	// $_REQUEST used for development / debugging. Remember to change to $_POST for production
 
-	$query = $conn->prepare('SELECT `l`.`id` as `id`, `l`.`name` AS `name` FROM `location` `l` WHERE `l`.`name` LIKE ? ORDER BY `l`.`name`');
+	$query = $conn->prepare('SELECT `id`, `name` FROM `location` WHERE `name` LIKE ? ORDER BY `name`');
 
   	$likeText = "%" . $_REQUEST['txt'] . "%";
 
