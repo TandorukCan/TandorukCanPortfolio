@@ -53,7 +53,7 @@ const debouncedSearch = debounce(function (url, func, filter) {
       showError(textStatus, errorThrown);
     },
   });
-}, 1500); // 1500ms delay
+}, 1000); // 1000ms delay
 
 function handleError(modalTitle, errorThrown) {
   if (errorThrown) {

@@ -786,9 +786,9 @@ function loadPersonnelTable(searchData) {
     .empty()
     .append(`<div id="personnelLoader" style="display: none;"></div>`);
 
-  if (!$("#mainLoader").is(":visible")) {
-    $("#personnelLoader").show();
-  }
+  // if (!$("#mainLoader").is(":visible")) {
+  //   $("#personnelLoader").show();
+  // }
 
   if (searchData === "refresh") {
     $("#searchInp").val("");

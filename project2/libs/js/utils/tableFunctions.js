@@ -58,7 +58,7 @@ function populatePersonnelTable(data) {
 
     var edtBtn = document.createElement("button");
     edtBtn.setAttribute("type", "button");
-    edtBtn.setAttribute("class", "btn btn-primary btn-sm");
+    edtBtn.setAttribute("class", "btn btn-primary btn-sm me-1");
     edtBtn.setAttribute("data-bs-toggle", "modal");
     edtBtn.setAttribute("data-bs-target", "#editPersonnelModal");
     edtBtn.setAttribute("data-id", item.id);
@@ -112,7 +112,7 @@ function populateDepartmentTable(data) {
 
     var edtBtn = document.createElement("button");
     edtBtn.setAttribute("type", "button");
-    edtBtn.setAttribute("class", "btn btn-primary btn-sm");
+    edtBtn.setAttribute("class", "btn btn-primary btn-sm me-1");
     edtBtn.setAttribute("data-bs-toggle", "modal");
     edtBtn.setAttribute("data-bs-target", "#editDepartmentModal");
     edtBtn.setAttribute("data-id", item.id);
@@ -158,7 +158,7 @@ function populateLocationTable(data) {
 
     var edtBtn = document.createElement("button");
     edtBtn.setAttribute("type", "button");
-    edtBtn.setAttribute("class", "btn btn-primary btn-sm");
+    edtBtn.setAttribute("class", "btn btn-primary btn-sm me-1");
     edtBtn.setAttribute("data-bs-toggle", "modal");
     edtBtn.setAttribute("data-bs-target", "#editLocationModal");
     edtBtn.setAttribute("data-id", item.id);
@@ -193,7 +193,9 @@ function loadDepartmentsTable(searchData) {
   if (searchData === "refresh") {
     $("#searchInp").val("");
   }
-  $("#departmentTableBody").empty().append(`<div id="departmentLoader"></div>`);
+  $("#departmentTableBody")
+    .empty()
+    .append(`<div id="departmentLoader" style="display: none;"></div>`);
 
   if (searchData !== "refresh") {
     // table will be populated based on search term
@@ -230,7 +232,9 @@ function loadLocationsTable(searchData) {
   if (searchData === "refresh") {
     $("#searchInp").val("");
   }
-  $("#locationTableBody").empty().append(`<div id="locationLoader"></div>`);
+  $("#locationTableBody")
+    .empty()
+    .append(`<div id="locationLoader" style="display: none;"></div>`);
 
   if (searchData !== "refresh") {
     // table will be populated based on search term
@@ -268,7 +272,7 @@ function filterTable(input, option) {
   $("#personnelTableBody")
     .empty()
     .append(`<div id="personnelLoader" style="display: none;"></div>`);
-  $("#personnelLoader").show();
+  // $("#personnelLoader").show();
   // var searchTerm = $("#searchInp").val().trim();
   let data = {
     txt: $("#searchInp").val().trim(),
